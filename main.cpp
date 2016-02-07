@@ -1,17 +1,18 @@
 #include<iostream>
-#include<boost/tokenizer.hpp>
 #include<string>
+#include<vector>
+#include<boost/foreach.hpp> 
+
+#include"parse.h"
 
 using namespace std;
 using namespace boost;
 
 int main() {
   string text = "This is; a      test";
-  char_separator<char> sep(" ");
-
-  tokenizer<char_separator<char> > tokens(text, sep);
-  for (tokenizer<char_separator<char> >::iterator beg=tokens.begin(); beg!=tokens.end(); ++beg) {
-    cout << *beg << "\n";
+  vector<string> tokenList = parse(text);
+  BOOST_FOREACH(string t, tokenList) {
+    cout << t << endl;
   }
   return 0;
 }
