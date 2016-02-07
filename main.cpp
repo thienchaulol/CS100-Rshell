@@ -9,7 +9,7 @@ using namespace std;
 using namespace boost;
 
 int main() {
-  string text = ";This; is; a      test;";
+  string text = "ls && ls;";
   vector<string> tokenList = parse(text);
   BOOST_FOREACH(string t, tokenList) {
     cout << t << endl;
