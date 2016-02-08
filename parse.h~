@@ -1,0 +1,6 @@
+#include<vector>
+#include<string>
+
+#include"parse.cpp"
+
+vector<string> parse(string text);
