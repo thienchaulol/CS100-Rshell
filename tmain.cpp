@@ -119,6 +119,62 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {
       s.push_back(pair<string, bool>(connector, true));
   }
 
+  while(s.at(s.size() - 1).second == true) {
+    string line;
+
+    cout << "> ";
+    getline(cin, line);
+
+    vector<pair<char, bool> > v2 = hashAndSlash(line);
+
+    while(!v2.empty()){
+      string command;
+      string connector;
+    
+      while(v2.at(0).first == ' ')
+	v2.erase(v2.begin());
+
+      int i = 0;
+      for(i = 0; i < v2.size(); i++) {
+	if(v2.at(i).first == '&' && v2.at(i).second == false)
+	  break;
+	else if(v2.at(i).first == '|' && v2.at(i).second == false)
+	  break;
+	else if(v2.at(i).first == ';' && v2.at(i).second == false)
+	  break;
+      }
+
+      for(int j = 0; j < i; j++) {
+	if(v2.at(0).first == '\\' && v2.at(0).second == false)
+	  v2.erase(v2.begin());
+	else {
+	  command += v2.at(0).first;
+	  v2.erase(v2.begin());
+	}
+      }
+
+      if(!v2.empty()) {
+	if(v2.at(0).first == '&' || v2.at(0).first == '|') {
+	  connector += v2.at(0).first;
+	  v2.erase(v2.begin());
+	}
+	if(v2.at(0).first == '&' || v2.at(0).first == '|') {
+	  connector += v2.at(0).first;
+	  v2.erase(v2.begin());
+	}
+	else if(v2.at(0).first == ';') {
+	  connector += v2.at(0).first;
+	  v2.erase(v2.begin());
+	}
+      }
+      
+      if(!command.empty()) 
+	s.push_back(pair<string, bool>(command, false));
+      if(!connector.empty())
+	s.push_back(pair<string, bool>(connector, true));      
+    }
+  }
+
   return s;
 }
 
@@ -128,9 +184,10 @@ int main() {
     string line;
 
     cout << "$ ";
+
     getline(cin, line);
 
-    char *argv[line.size() + 1];
+    //char *argv = new char[line.size() + 1];
     vector<pair<char, bool> > specVec = hashAndSlash(line);
 
     cout << "specVec.first and specVec.second:" << endl;
@@ -154,11 +211,11 @@ int main() {
     copy(line.begin(), line.end(), c);
     c[line.size()] = '\0';
 
-    finalParse(c, argv);
-    if(strcmp(argv[0], "exit") == 0) {
-      exit(0);
-    }
-    execute(argv);
+    //finalParse(c, argv);
+    //if(strcmp(argv[0], "exit") == 0) {
+    //  exit(0);
+    //}
+    //execute(argv);
   }
   return 0;
 }
