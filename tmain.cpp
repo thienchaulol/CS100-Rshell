@@ -253,7 +253,8 @@ int main() {
     struct passwd *passwd;
     passwd = getpwuid(getuid());
     char buf[32];
-    cout << '[' << passwd->pw_name << ' ' << gethostname(buf, sizeof buf) << "]$ ";		//$ will be the first character of the command line
+    gethostname(buf, sizeof buf);
+    cout << passwd->pw_name << '@' << buf << "$ ";		//$ will be the first character of the command line
 
     getline(cin, line);	//take in user input via command line
 
