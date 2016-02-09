@@ -21,9 +21,10 @@ void finalParse(char *line, char **argv) {
   *argv = '\0';
 }
 
-void execute(char **argv) {
+bool execute(char **argv) {
   pid_t pid;
   int status;
+  bool succeeded = true; 
 
   if((pid = fork()) < 0) {
     cout << "Error: Forking child process failed" << endl;
@@ -31,6 +32,7 @@ void execute(char **argv) {
   }
   else if(pid == 0) {
     if(execvp(*argv, argv) < 0) {
+      succeeded = false;      
       cout << "Error: exec failed" << endl;
       exit(1);
     }
@@ -39,6 +41,7 @@ void execute(char **argv) {
     while(wait(&status) != pid) {
     }
   }
+  return succeeded;
 }
 
 vector<pair<char, bool> > hashAndSlash(string str) {					//hash and slash function used to "hash and slash" user input
@@ -46,7 +49,7 @@ vector<pair<char, bool> > hashAndSlash(string str) {					//hash and slash functi
   bool isInWord = false;												//isInWord used to determine if character is a part of "word"---argument/command
   bool isAfterBackslash = false;										//isAfterBackslash to determine if character is "special"---after a backslash
 
-  for(int i = 0; i < str.size(); i++) {									//for loop to iterate through user input
+  for(unsigned i = 0; i < str.size(); i++) {									//for loop to iterate through user input
     if(str.at(i) == ' ') {												//if whitespace found, character cannot be part of argument/command
       isInWord = false;														//so set isInWord to false
       isAfterBackslash = false;												//and set isAfterBackslash to false
@@ -78,7 +81,7 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
     while(v.at(0).first == ' ')											//if specVec's first character is whitespace....
       v.erase(v.begin());													//erase whitespace until you get to the "good stuff" (argument/command or connectors)
 
-    int i = 0;
+    unsigned i = 0;
     for(i = 0; i < v.size(); i++){										//for loop to iterate through specVec and check for single connectors
       if(v.at(i).first == '&' && v.at(i).second == false)					//if first character is connector: & and bool value is false---break out of while loop
 	break;
@@ -88,7 +91,7 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
 	break;
     }
 
-    for(int j = 0; j < i; j++) {										//for loop to iterate through vector again, this time using i as v.size	
+    for(unsigned j = 0; j < i; j++) {										//for loop to iterate through vector again, this time using i as v.size	
       if(v.at(0).first == '\\' && v.at(0).second == false)					//if first character is: '\\' and bool value is false.....
 	v.erase(v.begin());															//erase the first value
       else {																//if first character is not: '\\' and bool value is true......
@@ -102,13 +105,15 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
 	connector += v.at(0).first;													//"increment"(add) character to connector string. that is, build the connector
 	v.erase(v.begin());															//erase original connector, character by character
       }
-      if(v.at(0).first == '&' || v.at(0).first == '|') {				//same as lines above because connectors are: "&&" and "||"
-	connector += v.at(0).first;
-	v.erase(v.begin());
-      }
-      else if(v.at(0).first == ';') {										//if first character is: ;
-	connector += v.at(0).first;													//"increment"(add) character to connector string.....
-	v.erase(v.begin());															//erase original connector......
+      if(!v.empty()) {
+	if(v.at(0).first == '&' || v.at(0).first == '|') {				//same as lines above because connectors are: "&&" and "||"
+	  connector += v.at(0).first;
+	  v.erase(v.begin());
+	}
+	else if(v.at(0).first == ';') {										//if first character is: ;
+	  connector += v.at(0).first;													//"increment"(add) character to connector string.....
+	  v.erase(v.begin());															//erase original connector......
+	}
       }
     }
 
@@ -118,9 +123,11 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
       s.push_back(pair<string, bool>(connector, true));						//push back connector to vector s, s will contain........
   }
 
-  while(s.at(s.size() - 1).second == true) {							//starting from the last element of s, while the boolean values for vector s are true, prompt user for extra input
+  while((s.at(s.size() - 1).second == true && s.at(s.size() - 1).first == "&&")
+	|| (s.at(s.size() - 1).second == true && s.at(s.size() - 1).first == "||")
+	|| (s.at(s.size() - 1).second == true && s.at(s.size() - 1).first == "|")) {							//starting from the last element of s, while the boolean values for vector s are true, prompt user for extra input
     string line;
-
+    
     cout << "> ";
     getline(cin, line);													//get more input from user as long as there is a connector at end of input
 
@@ -133,7 +140,7 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
       while(v2.at(0).first == ' ')
 	v2.erase(v2.begin());
 
-      int i = 0;
+      unsigned i = 0;
       for(i = 0; i < v2.size(); i++) {
 	if(v2.at(i).first == '&' && v2.at(i).second == false)
 	  break;
@@ -143,7 +150,7 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
 	  break;
       }
 
-      for(int j = 0; j < i; j++) {
+      for(unsigned j = 0; j < i; j++) {
 	if(v2.at(0).first == '\\' && v2.at(0).second == false)
 	  v2.erase(v2.begin());
 	else {
@@ -178,6 +185,56 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
 								//parse function was able to seperate individual user input through a series of if and else statements and store user commands as strings in s.
 }
 
+void run(vector<pair<string, bool> > v) {
+  bool prevCom = true;  
+  bool doIRun = true;
+  
+  if(v.at(0).second == 1) {
+    cout << "syntax error near unexpected token `" << v.at(0).first << "'" << endl;
+    return;
+  }
+  while(!v.empty()) {
+    if(v.at(0).second == 0 && doIRun) {
+      unsigned lineSize = v.at(0).first.size() + 1;
+      char **argv = new char*[lineSize];
+
+      char *c = new char[lineSize];
+      copy(v.at(0).first.begin(), v.at(0).first.end(), c);
+      c[v.at(0).first.size()] = '\0';
+
+      finalParse(c, argv);
+      if(strcmp(argv[0], "exit") == 0) {
+	exit(0);
+      }
+      prevCom = execute(argv);
+      v.erase(v.begin());
+    }  
+    else if(v.at(0).second == 0 && !doIRun) 
+      v.erase(v.begin());
+    if(!v.empty()) {
+      if(v.at(0).first == "&&") {
+	if(prevCom == true)
+	  doIRun = true;
+	else
+	  doIRun = false;
+      } 
+      else if(v.at(0).first == "||" || v.at(0).first == "|") {
+	if(prevCom == true)
+	  doIRun = false;
+	else
+	  doIRun = true;
+      }
+      else if(v.at(0).first == "&") {
+	cout << "syntax error near unexpected token '" << v.at(0).first << "'" << endl;
+	return;
+      }
+      else if(v.at(0).first == ";") 
+	doIRun = true;
+      v.erase(v.begin());
+    }
+  }
+}
+
 int main() {
 
   while(1) {			//begin program
@@ -187,34 +244,38 @@ int main() {
 
     getline(cin, line);	//take in user input via command line
 
-    //char *argv = new char[line.size() + 1];
+    //unsigned lineSize = line.size() + 1;
+    //char **argv = new char*[lineSize];
+
     vector<pair<char, bool> > specVec = hashAndSlash(line);			//specVec will be a vector of pairs of characters and bools composed by the hashAndSlash function
 																	//hashAndSlash will return vector of characters and bools of userinput, facilitating the process of denoting arguments/commands
     cout << "specVec.first and specVec.second:" << endl;			
-    for(int i = 0; i < specVec.size(); i++)							//for loop to output characters of commands from user input processed from hashAndSlash
+    for(unsigned i = 0; i < specVec.size(); i++)							//for loop to output characters of commands from user input processed from hashAndSlash
       cout << specVec.at(i).first;
     cout << endl;
-    for(int i = 0; i < specVec.size(); i++)							//for loop to output bool values of isAfterBackslash
+    for(unsigned i = 0; i < specVec.size(); i++)							//for loop to output bool values of isAfterBackslash
       cout<< specVec.at(i).second;
     cout << endl << endl;
 
     vector<pair<string, bool> > parsedVec = parse(specVec);			//parsedVec will be a vector of pairs of strings and bools composed of parse function
 																	//parse function should split up specVec into seperate strings. these strings being the user commands split up from connectors
     cout << "parsedVec.second and parsedVec.first:" << endl;
-    for(int i = 0; i < parsedVec.size(); i++)									//for loop to output boolean values and string values of newly "parsed" user input
+    for(unsigned i = 0; i < parsedVec.size(); i++)									//for loop to output boolean values and string values of newly "parsed" user input
       cout << parsedVec.at(i).second << ' ' << parsedVec.at(i).first << endl;
     cout << endl;
 
     cout << "output:" << endl;
+    
+    run(parsedVec);
 
-    char *c = new char[line.size() + 1];						//series of lines used to execute user commands
-    copy(line.begin(), line.end(), c);								
-    c[line.size()] = '\0';
-
+    //char *c = new char[line.size() + 1];						//series of lines used to execute user commands
+    //copy(line.begin(), line.end(), c);								
+    //c[line.size()] = '\0';
+    
     //finalParse(c, argv);
     //if(strcmp(argv[0], "exit") == 0) {
-    //  exit(0);
-    //}
+      //exit(0);
+      //}
     //execute(argv);
   }
   return 0;
