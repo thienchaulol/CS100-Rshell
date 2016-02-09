@@ -5,6 +5,8 @@
 #include <string.h>
 #include <iostream>
 #include <vector>
+#include <sys/types.h>
+#include <pwd.h>
 
 using namespace std;
 
@@ -30,15 +32,23 @@ bool execute(char **argv) {
     cout << "Error: Forking child process failed" << endl;
     exit(1);
   }
-  else if(pid == 0) {
-    if(execvp(*argv, argv) < 0) {
-      succeeded = false;      
-      cout << "Error: exec failed" << endl;
-      exit(1);
+  else if(pid > 0) {
+    while (wait(&status) != pid);
+
+    if(WIFEXITED(status)) {
+      if(WEXITSTATUS(status) != 0) {
+	succeeded = false;
+      }
+    }
+    else {
+      succeeded = false;
     }
   }
   else {
-    while(wait(&status) != pid) {
+    if(execvp(*argv, argv) < 0) {
+      //perror(NULL);
+      succeeded = false;
+      kill(getpid(), 2);
     }
   }
   return succeeded;
@@ -240,7 +250,10 @@ int main() {
   while(1) {			//begin program
     string line;
 
-    cout << "$ ";		//$ will be the first character of the command line
+    struct passwd *passwd;
+    passwd = getpwuid(getuid());
+    char buf[32];
+    cout << '[' << passwd->pw_name << ' ' << gethostname(buf, sizeof buf) << "]$ ";		//$ will be the first character of the command line
 
     getline(cin, line);	//take in user input via command line
 
