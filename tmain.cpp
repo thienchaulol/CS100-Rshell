@@ -46,7 +46,7 @@ bool execute(char **argv) {
   }
   else {
     if(execvp(*argv, argv) < 0) {
-      //perror(NULL);
+      perror(NULL);
       succeeded = false;
       kill(getpid(), 2);
     }
@@ -57,33 +57,82 @@ bool execute(char **argv) {
 vector<pair<char, bool> > hashAndSlash(string str) {					//hash and slash function used to "hash and slash" user input
   vector<pair<char, bool> > v;											//vector v will be made of pairs of characters and bools
   bool isInWord = false;												//isInWord used to determine if character is a part of "word"---argument/command
-  bool isAfterBackslash = false;										//isAfterBackslash to determine if character is "special"---after a backslash
+  bool isAfterBackslash = false;
+  bool allQuotesFound = true;										//isAfterBackslash to determine if character is "special"---after a backslash
+  bool isNormalChar = false;
 
-  for(unsigned i = 0; i < str.size(); i++) {									//for loop to iterate through user input
-    if(str.at(i) == ' ') {												//if whitespace found, character cannot be part of argument/command
-      isInWord = false;														//so set isInWord to false
-      isAfterBackslash = false;												//and set isAfterBackslash to false
+  for(unsigned i = 0; i < str.size(); i++) {
+    if(str.at(i) == ' ') {
+      isInWord = false;
+      v.push_back(pair<char, bool>(str.at(i), isNormalChar));
     }
-    else if(str.at(i) != ' ' && str.at(i) != '#') {						//if no whitespace found and no "#" symbol found, character is part of argument/command
-      isInWord = true;														//set isInWord to true
-      if(str.at(i) == '\\' && !isAfterBackslash) {							//if character is "\\" and is not after a backslash
-	v.push_back(pair<char, bool>(str.at(i), isAfterBackslash));				//push character and bool value to back of vector v
-	isAfterBackslash = true;												//set isAfterBackslash to true
-	if(i + 1 <= str.size() - 1)											//if before second to last character
-	  i++;																	//increment i
+    else {
+      if(str.at(i) == '#' && !isInWord && !isNormalChar)
+	break;
+      else if(str.at(i) == '\\' && (!isAfterBackslash || !isNormalChar)) {
+	if(i + 1 <= str.size() - 1) {
+	  i++;
+	  v.push_back(pair<char, bool>(str.at(i), true));
+	}
       }
+      else if(str.at(i) == '"') {
+	if(allQuotesFound == true) { 
+	  allQuotesFound = false;
+	  isNormalChar = true;
+	}
+	else if(!allQuotesFound) {
+	  allQuotesFound = true;
+	  isNormalChar = false;
+	}
+      }
+      else
+	v.push_back(pair<char, bool>(str.at(i), isNormalChar));
+      isInWord = true;
     }
-    else if(str.at(i) == '#' && !isInWord)								//if character is "#" symbol and is not in word
-      break;																//break out of the function because argument/command is actually a comment
-    v.push_back(pair<char, bool>(str.at(i), isAfterBackslash));			//push back character and bool(isAfterBackslash) to v
-    isAfterBackslash = false;											//set isAfterBackslash to false
   }
-  return v;																//return vector v, v is composed of argument/command characters and isAfterBackslash bool values
+
+  while(!allQuotesFound) {
+    string line;
+    
+    cout << "> ";
+    getline(cin, line);													//get more input from user as long as there is a connector at end of input
+
+    for(unsigned i = 0; i < line.size(); i++) {
+      if(line.at(i) == ' ') {
+	isInWord = false;
+	v.push_back(pair<char, bool>(line.at(i), isNormalChar));
+      }
+      else {
+	if(line.at(i) == '#' && !isInWord)
+	  break;
+	else if(line.at(i) == '\\' && (!isAfterBackslash || !isNormalChar)) {
+	  if(i + 1 <= line.size() - 1) {
+	    i++;
+	    v.push_back(pair<char, bool>(line.at(i), true));
+	  }
+	}
+	else if(line.at(i) == '"') {
+	  if(allQuotesFound) { 
+	    allQuotesFound = false;
+	    isNormalChar = true;
+	  }
+	  else if(!allQuotesFound) {
+	    allQuotesFound = true;
+	    isNormalChar = false;
+	  }
+	}
+	else
+	  v.push_back(pair<char, bool>(line.at(i), isNormalChar));
+	isInWord = true;
+      }
+    } 
+  }
+  return v;
 }
 
 vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse function takes in specVec which is a vector of characters and bools created from user input
   vector<pair<string, bool> > s;										//vector s will be made of strings and booleans. will eventually store individual arguments/commands
-  
+
   while(!v.empty()){													//while vector of characters (specVec), v, is not empty do......
     string command;															//command string to hold argument(s)/command(s)
     string connector;														//connector string to hold connector(s)
@@ -93,16 +142,16 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
 
     unsigned i = 0;
     for(i = 0; i < v.size(); i++){										//for loop to iterate through specVec and check for single connectors
-      if(v.at(i).first == '&' && v.at(i).second == false)					//if first character is connector: & and bool value is false---break out of while loop
+      if(v.at(i).first == '&' && !v.at(i).second)					//if first character is connector: & and bool value is false---break out of while loop
 	break;
-      else if(v.at(i).first == '|' && v.at(i).second == false)				//if first character is connector: | and bool value is false---break out of while loop
+      else if(v.at(i).first == '|' && !v.at(i).second)				//if first character is connector: | and bool value is false---break out of while loop
 	break;
-      else if(v.at(i).first == ';' && v.at(i).second == false)				//if first character is connector: ; and bool value is false---break out of while loop
+      else if(v.at(i).first == ';' && !v.at(i).second)				//if first character is connector: ; and bool value is false---break out of while loop
 	break;
     }
 
     for(unsigned j = 0; j < i; j++) {										//for loop to iterate through vector again, this time using i as v.size	
-      if(v.at(0).first == '\\' && v.at(0).second == false)					//if first character is: '\\' and bool value is false.....
+      if(v.at(0).first == '\\' && !v.at(0).second)					//if first character is: '\\' and bool value is false.....
 	v.erase(v.begin());															//erase the first value
       else {																//if first character is not: '\\' and bool value is true......
 	command += v.at(0).first;													//"increment"(add) character to command string. that is, build the command
@@ -133,9 +182,9 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
       s.push_back(pair<string, bool>(connector, true));						//push back connector to vector s, s will contain........
   }
 
-  while((s.at(s.size() - 1).second == true && s.at(s.size() - 1).first == "&&")
-	|| (s.at(s.size() - 1).second == true && s.at(s.size() - 1).first == "||")
-	|| (s.at(s.size() - 1).second == true && s.at(s.size() - 1).first == "|")) {							//starting from the last element of s, while the boolean values for vector s are true, prompt user for extra input
+  while((s.at(s.size() - 1).second && s.at(s.size() - 1).first == "&&")
+	|| (s.at(s.size() - 1).second && s.at(s.size() - 1).first == "||")
+	|| (s.at(s.size() - 1).second && s.at(s.size() - 1).first == "|")) {							//starting from the last element of s, while the boolean values for vector s are true, prompt user for extra input
     string line;
     
     cout << "> ";
@@ -152,16 +201,16 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
 
       unsigned i = 0;
       for(i = 0; i < v2.size(); i++) {
-	if(v2.at(i).first == '&' && v2.at(i).second == false)
+	if(v2.at(i).first == '&' && !v2.at(i).second)
 	  break;
-	else if(v2.at(i).first == '|' && v2.at(i).second == false)
+	else if(v2.at(i).first == '|' && !v2.at(i).second)
 	  break;
-	else if(v2.at(i).first == ';' && v2.at(i).second == false)
+	else if(v2.at(i).first == ';' && !v2.at(i).second)
 	  break;
       }
 
       for(unsigned j = 0; j < i; j++) {
-	if(v2.at(0).first == '\\' && v2.at(0).second == false)
+	if(v2.at(0).first == '\\' && !v2.at(0).second)
 	  v2.erase(v2.begin());
 	else {
 	  command += v2.at(0).first;
@@ -223,13 +272,13 @@ void run(vector<pair<string, bool> > v) {
       v.erase(v.begin());
     if(!v.empty()) {
       if(v.at(0).first == "&&") {
-	if(prevCom == true)
+	if(prevCom)
 	  doIRun = true;
 	else
 	  doIRun = false;
       } 
       else if(v.at(0).first == "||" || v.at(0).first == "|") {
-	if(prevCom == true)
+	if(prevCom)
 	  doIRun = false;
 	else
 	  doIRun = true;
@@ -254,7 +303,7 @@ int main() {
     passwd = getpwuid(getuid());
     char buf[32];
     gethostname(buf, sizeof buf);
-    cout << passwd->pw_name << '@' << buf << "$ ";		//$ will be the first character of the command line
+    cout << passwd->pw_name << '@' << buf << " $ ";		//$ will be the first character of the command line
 
     getline(cin, line);	//take in user input via command line
 
