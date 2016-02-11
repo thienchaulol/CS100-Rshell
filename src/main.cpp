@@ -28,8 +28,8 @@ int main() {
     //for(unsigned i = 0; i < specVec.size(); i++)							//for loop to output bool values of isAfterBackslash
 	//cout<< specVec.at(i).second;
     //cout << endl << endl;
-
-    vector<pair<string, bool> > parsedVec = parse(specVec);			//parsedVec will be a vector of pairs of strings and bools composed of parse function
+    if(!specVec.empty()) {
+      vector<pair<string, bool> > parsedVec = parse(specVec);			//parsedVec will be a vector of pairs of strings and bools composed of parse function
 																	//parse function should split up specVec into seperate strings. these strings being the user commands split up from connectors
     //cout << "parsedVec.second and parsedVec.first:" << endl;
     //for(unsigned i = 0; i < parsedVec.size(); i++)									//for loop to output boolean values and string values of newly "parsed" user input
@@ -38,7 +38,8 @@ int main() {
 
     //cout << "output:" << endl;
     
-    run(parsedVec);
+      run(parsedVec);
+    }
 
     //char *c = new char[line.size() + 1];						//series of lines used to execute user commands
     //copy(line.begin(), line.end(), c);								

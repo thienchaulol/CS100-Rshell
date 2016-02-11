@@ -257,17 +257,22 @@ void run(vector<pair<string, bool> > v) {
     if(v.at(0).second == 0 && doIRun) {
       unsigned lineSize = v.at(0).first.size() + 1;
       char **argv = new char*[lineSize];
-
+      
       char *c = new char[lineSize];
       copy(v.at(0).first.begin(), v.at(0).first.end(), c);
       c[v.at(0).first.size()] = '\0';
-
+      
       finalParse(c, argv);
-      if(strcmp(argv[0], "exit") == 0) {
+      char curDir[100];
+      getcwd(curDir, 100);
+      if(strcmp(argv[0], "exit") == 0) 
 	exit(0);
+      if(strcmp(*argv, "cd") == 0) 
+	chdir(argv[1]);
+      else {
+	prevCom = execute(argv);
+	v.erase(v.begin());
       }
-      prevCom = execute(argv);
-      v.erase(v.begin());
     }  
     else if(v.at(0).second == 0 && !doIRun) 
       v.erase(v.begin());
