@@ -10,7 +10,7 @@
 
 using namespace std;
 
-void finalParse(char *line, char **argv) {
+void finalParse(char *line, char **argv) {						//final parse function. called in run()
   while(*line != '\0') {
     while(*line == ' ' || *line == '\t' || *line == '\n') {
       *line++ = '\0';
@@ -23,10 +23,10 @@ void finalParse(char *line, char **argv) {
   *argv = '\0';
 }
 
-bool execute(char **argv) {
+bool execute(char **argv){				//function to execute commands from user
   pid_t pid;
   int status;
-  bool succeeded = true; 
+  bool succeeded = true; 				//boolean value to check if function was able to execute
 
   if((pid = fork()) < 0) {
     cout << "Error: Forking child process failed" << endl;
@@ -51,7 +51,8 @@ bool execute(char **argv) {
       kill(getpid(), 2);
     }
   }
-  return succeeded;
+  return succeeded;					//execute() will return true if function was able to execute. else false.
+									//execute() called in run() function later on.
 }
 
 vector<pair<char, bool> > hashAndSlash(string str) {					//hash and slash function used to "hash and slash" user input
@@ -61,29 +62,29 @@ vector<pair<char, bool> > hashAndSlash(string str) {					//hash and slash functi
   bool allQuotesFound = true;										//isAfterBackslash to determine if character is "special"---after a backslash
   bool isNormalChar = false;
 
-  for(unsigned i = 0; i < str.size(); i++) {
-    if(str.at(i) == ' ') {
-      isInWord = false;
-      v.push_back(pair<char, bool>(str.at(i), isNormalChar));
+  for(unsigned i = 0; i < str.size(); i++) {					//for loop to iterate through user input
+    if(str.at(i) == ' ') {										//whitespace not part of commands
+      isInWord = false;												//set isInWord to false
+      v.push_back(pair<char, bool>(str.at(i), isNormalChar));		//pushback character into vector v, store character with isNormalChar set to false
     }
     else {
-      if(str.at(i) == '#' && !isInWord && !isNormalChar)
+      if(str.at(i) == '#' && !isInWord && !isNormalChar)		//if character "#" symbol, isInWord is true, and isNormalChar is true, break out of hashAndSlash
 	break;
-      else if(str.at(i) == '\\' && (!isAfterBackslash || !isNormalChar)) {
-	if(i + 1 <= str.size() - 1) {
-	  i++;
-	  v.push_back(pair<char, bool>(str.at(i), true));
+      else if(str.at(i) == '\\' && (!isAfterBackslash || !isNormalChar)) { //if character is "\\", and is after a back slash, or a normal character
+	if(i + 1 <= str.size() - 1) {											//if character index + 1 is less than or equal to length of string - 1. (is not last or second to last character)
+	  i++;																		//increment index value
+	  v.push_back(pair<char, bool>(str.at(i), true));							//push back index value and bool val true
 	}
       }
-      else if(str.at(i) == '"') {
-	if(allQuotesFound == true) { 
-	  allQuotesFound = false;
-	  isNormalChar = true;
+      else if(str.at(i) == '"') {		//dealing with Quotes. if character is a quotation mark
+	if(allQuotesFound == true) { 			//if all quotes are found
+	  allQuotesFound = false;					//set allQuotesFound to false
+	  isNormalChar = true;						//set isNormalChar to true
 	}
-	else if(!allQuotesFound) {
-	  allQuotesFound = true;
-	  isNormalChar = false;
-	}
+	else if(!allQuotesFound) {				//if not all quotes are found
+	  allQuotesFound = true;					//set all quotes found to true
+	  isNormalChar = false;						//set is normal character to false
+	}									//Quotes dealt with.
       }
       else
 	v.push_back(pair<char, bool>(str.at(i), isNormalChar));
@@ -91,13 +92,13 @@ vector<pair<char, bool> > hashAndSlash(string str) {					//hash and slash functi
     }
   }
 
-  while(!allQuotesFound) {
+  while(!allQuotesFound) {				//while not all quotes are found
     string line;
     
-    cout << "> ";
-    getline(cin, line);													//get more input from user as long as there is a connector at end of input
+    cout << "> ";						//re-prompty user for input
+    getline(cin, line);					//get input from user 
 
-    for(unsigned i = 0; i < line.size(); i++) {
+    for(unsigned i = 0; i < line.size(); i++) {										// repeat beginning functionality.........
       if(line.at(i) == ' ') {
 	isInWord = false;
 	v.push_back(pair<char, bool>(line.at(i), isNormalChar));
@@ -127,7 +128,7 @@ vector<pair<char, bool> > hashAndSlash(string str) {					//hash and slash functi
       }
     } 
   }
-  return v;
+  return v;				//return vector v, vector v will be composed of pairs of characters and bools
 }
 
 vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse function takes in specVec which is a vector of characters and bools created from user input
@@ -178,14 +179,14 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
     }
 
     if(!command.empty())												//if command is not empty(means we were able to retrieve commands from specVec which is userinput), do....
-      s.push_back(pair<string, bool>(command, false));						//push back command to vector s, s will contain.........
+      s.push_back(pair<string, bool>(command, false));						//push back command to vector s, s will contain pairs of strings and bools
     if(!connector.empty())												//if connector is not empty(able to retrieve connectors)
-      s.push_back(pair<string, bool>(connector, true));						//push back connector to vector s, s will contain........
+      s.push_back(pair<string, bool>(connector, true));						//push back connector to vector s, s will contain pairs of strings and bools
   }
 
   while((s.at(s.size() - 1).second && s.at(s.size() - 1).first == "&&")
 	|| (s.at(s.size() - 1).second && s.at(s.size() - 1).first == "||")
-	|| (s.at(s.size() - 1).second && s.at(s.size() - 1).first == "|")) {							//starting from the last element of s, while the boolean values for vector s are true, prompt user for extra input
+	|| (s.at(s.size() - 1).second && s.at(s.size() - 1).first == "|")) {	//starting from the last element of s, while the boolean values for vector s are true, prompt user for extra input
     string line;
     
     cout << "> ";
@@ -245,17 +246,17 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
 								//parse function was able to seperate individual user input through a series of if and else statements and store user commands as strings in s.
 }
 
-void run(vector<pair<string, bool> > v) {
-  bool prevCom = true;  
-  bool doIRun = true;
+void run(vector<pair<string, bool> > v) {		//vector v will be parsedVec.
+  bool prevCom = true; 							//prevCom = previous command
+  bool doIRun = true;							//boolean value to determine whether or not to run the next command
   
   if(v.at(0).second == 1) {
     cout << "syntax error near unexpected token `" << v.at(0).first << "'" << endl;
     return;
   }
-  while(!v.empty()) {
-    if(v.at(0).second == 0 && doIRun) {
-      unsigned lineSize = v.at(0).first.size() + 1;
+  while(!v.empty()) {							//execute while loop while vector v is not empty
+    if(v.at(0).second == 0 && doIRun) {			//if doIRun is true...
+      unsigned lineSize = v.at(0).first.size() + 1;		//
       char **argv = new char*[lineSize];
       
       char *c = new char[lineSize];
@@ -270,32 +271,32 @@ void run(vector<pair<string, bool> > v) {
       if(strcmp(*argv, "cd") == 0) 
 	chdir(argv[1]);
       else {
-	prevCom = execute(argv);
-	v.erase(v.begin());
+	prevCom = execute(argv);			//prevCom true if execute succeeded. prevCom false if execute failed.
+	v.erase(v.begin());					//erase beginning of vector, in order to move to next value
       }
     }  
-    else if(v.at(0).second == 0 && !doIRun) 
-      v.erase(v.begin());
-    if(!v.empty()) {
-      if(v.at(0).first == "&&") {
-	if(prevCom)
-	  doIRun = true;
+    else if(v.at(0).second == 0 && !doIRun) //if doIRun is false
+      v.erase(v.begin());					//erase first value of vector
+    if(!v.empty()) {					//if values are present in v 
+      if(v.at(0).first == "&&") {			//if present value is connector: &&
+	if(prevCom)									//if prevCom was successful
+	  doIRun = true;							//set doIRun to true
 	else
-	  doIRun = false;
+	  doIRun = false;							//else set doIRun to false
       } 
-      else if(v.at(0).first == "||" || v.at(0).first == "|") {
-	if(prevCom)
-	  doIRun = false;
+      else if(v.at(0).first == "||" || v.at(0).first == "|") {	//if present value is connector: || or |
+	if(prevCom)														//if prevcom was successful
+	  doIRun = false;													//set doIRun to true
 	else
-	  doIRun = true;
+	  doIRun = true;													//else set doIRun to false
       }
-      else if(v.at(0).first == "&") {
-	cout << "syntax error near unexpected token '" << v.at(0).first << "'" << endl;
+      else if(v.at(0).first == "&") {												//if present value is connector: &
+	cout << "syntax error near unexpected token '" << v.at(0).first << "'" << endl;		//return from run
 	return;
       }
-      else if(v.at(0).first == ";") 
-	doIRun = true;
-      v.erase(v.begin());
+      else if(v.at(0).first == ";") 			//if present value is connector: ;
+	doIRun = true;									//set doIRun to true
+      v.erase(v.begin());							//erase beginning of vector
     }
   }
 }
