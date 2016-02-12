@@ -1,12 +1,9 @@
 #!/bin/bash
 
 ../bin/./rshell << EOF
-cal
-date
-ls
-echo A
-ls -a
-who
+echo A && echo dog
+ls && echo A
+echo A && ls
 exit
 EOF
 printf "\n"
