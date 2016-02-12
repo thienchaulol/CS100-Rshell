@@ -13,8 +13,8 @@ int main() {
 
     struct passwd *passwd;
     passwd = getpwuid(getuid());
-    char buf[32];
-    gethostname(buf, sizeof buf);
+    char buf[32];								//extra credit portion of assignment
+    gethostname(buf, sizeof buf);						//returns null-terminated hostname in the character array buf
     cout << passwd->pw_name << '@' << buf << " $ ";		//$ will be the first character of the command line
 
     getline(cin, line);	//take in user input via command line
@@ -38,7 +38,7 @@ int main() {
 
     //cout << "output:" << endl;
     
-      run(parsedVec);
+      run(parsedVec);											//call run function of parsedVec.
     }
 
     //char *c = new char[line.size() + 1];						//series of lines used to execute user commands
