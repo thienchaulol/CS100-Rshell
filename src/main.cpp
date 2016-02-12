@@ -6,8 +6,7 @@
 
 #include "parse.h"
 
-int main()
-{
+int main() {
 
   while(1) {			//begin program
     string line;
@@ -42,13 +41,13 @@ int main()
       run(parsedVec);											//call run function of parsedVec.
     }
 
-    char *c = new char[line.size() + 1];						//series of lines used to execute user commands
-    copy(line.begin(), line.end(), c);								
-    c[line.size()] = '\0';
+    //char *c = new char[line.size() + 1];						//series of lines used to execute user commands
+    //copy(line.begin(), line.end(), c);								
+    //c[line.size()] = '\0';
     
     //finalParse(c, argv);
     //if(strcmp(argv[0], "exit") == 0) {
-     // exit(0);
+      //exit(0);
       //}
     //execute(argv);
   }
