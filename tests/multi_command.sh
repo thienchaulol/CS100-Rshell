@@ -7,6 +7,7 @@ echo C || echo D
 echo D | echo F
 ls && echo D
 ls || echo D
+echo D && ls
 exit
 EOF
 printf "\n" 
