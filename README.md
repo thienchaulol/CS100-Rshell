@@ -11,3 +11,8 @@ Input: ls && echo A
 Experimental Rshell Output: ls: cannot access : No such file or directory
 Actual output: [files]
 				A
+
+10:54 PM 2/11/2016
+Input: echo A && #hi
+Experimental Rshell Output: crash
+Actual output: prompts user for more input " > " 
