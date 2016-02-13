@@ -79,11 +79,14 @@ vector<pair<char, bool> > hashAndSlash(string str) {					//hash and slash functi
       else if(str.at(i) == '"') {		//dealing with Quotes. if character is a quotation mark
 	if(allQuotesFound == true) { 			//if all quotes are found
 	  allQuotesFound = false;					//set allQuotesFound to false
-	  isNormalChar = true;						//set isNormalChar to true
+	  isNormalChar = true;
+	  v.push_back(pair<char, bool>(str.at(i), false));
+	  						//set isNormalChar to true
 	}
 	else if(!allQuotesFound) {				//if not all quotes are found
 	  allQuotesFound = true;					//set all quotes found to true
-	  isNormalChar = false;						//set is normal character to false
+	  isNormalChar = false;
+	  v.push_back(pair<char, bool>(str.at(i), false));						//set is normal character to false
 	}									//Quotes dealt with.
       }
       else
@@ -116,10 +119,12 @@ vector<pair<char, bool> > hashAndSlash(string str) {					//hash and slash functi
 	  if(allQuotesFound) { 
 	    allQuotesFound = false;
 	    isNormalChar = true;
+	    v.push_back(pair<char, bool>(str.at(i), false));
 	  }
 	  else if(!allQuotesFound) {
 	    allQuotesFound = true;
 	    isNormalChar = false;
+	    v.push_back(pair<char, bool>(str.at(i), false));
 	  }
 	}
 	else
@@ -154,7 +159,11 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
 
     for(unsigned j = 0; j < i; j++) {										//for loop to iterate through vector again, this time using i as v.size	
       if(v.at(0).first == '\\' && !v.at(0).second)					//if first character is: '\\' and bool value is false.....
-	v.erase(v.begin());															//erase the first value
+	v.erase(v.begin());
+      else if(v.at(0).first == '\"' && !v.at(0).second) {
+	command += v.at(0).first;
+	v.erase(v.begin());
+      }															//erase the first value
       else {																//if first character is not: '\\' and bool value is true......
 	command += v.at(0).first;													//"increment"(add) character to command string. that is, build the command
 	v.erase(v.begin());															//erase original command, character by character
@@ -178,8 +187,13 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
       }
     }
 
-    if(!command.empty())												//if command is not empty(means we were able to retrieve commands from specVec which is userinput), do....
-      s.push_back(pair<string, bool>(command, false));						//push back command to vector s, s will contain pairs of strings and bools
+    if(!command.empty()) {
+      while(command.at(command.size() - 1) == ' '
+	    || command.at(command.size() - 1) == '\t'
+	    || command.at(command.size() - 1) == '\n') 
+	command.erase(command.size() - 1, 1);												//if command is not empty(means we were able to retrieve commands from specVec which is userinput), do....
+      s.push_back(pair<string, bool>(command, false));
+    }						//push back command to vector s, s will contain pairs of strings and bools
     if(!connector.empty())												//if connector is not empty(able to retrieve connectors)
       s.push_back(pair<string, bool>(connector, true));						//push back connector to vector s, s will contain pairs of strings and bools
   }
@@ -214,6 +228,10 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
       for(unsigned j = 0; j < i; j++) {
 	if(v2.at(0).first == '\\' && !v2.at(0).second)
 	  v2.erase(v2.begin());
+	else if(v.at(0).first == '\"' && !v.at(0).second) {
+	  v.erase(v.begin());
+	  command += v.at(0).first;
+	}
 	else {
 	  command += v2.at(0).first;
 	  v2.erase(v2.begin());
@@ -235,8 +253,13 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {		//parse functi
 	}
       }
       
-      if(!command.empty()) 
+      if(!command.empty()) {
+	while(command.at(command.size() - 1) == ' '
+	      || command.at(command.size() - 1) == '\t'
+	      || command.at(command.size() - 1) == '\n') 
+	  command.erase(command.size() - 1, 1);
 	s.push_back(pair<string, bool>(command, false));
+      }
       if(!connector.empty())
 	s.push_back(pair<string, bool>(connector, true));      
     }
@@ -255,7 +278,7 @@ void run(vector<pair<string, bool> > v) {		//vector v will be parsedVec.
     return;
   }
   while(!v.empty()) {							//execute while loop while vector v is not empty
-    if(v.at(0).second == 0 && doIRun) {			//if doIRun is true...
+    if(v.at(0).second == 0 && doIRun) {		//if doIRun is true...
       unsigned lineSize = v.at(0).first.size() + 1;		//
       char **argv = new char*[lineSize];
       

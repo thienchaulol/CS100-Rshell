@@ -20,7 +20,8 @@ int main() {
     getline(cin, line);	//take in user input via command line
 
     vector<pair<char, bool> > specVec = hashAndSlash(line);			//specVec will be a vector of pairs of characters and bools composed by the hashAndSlash function
-																	//hashAndSlash will return vector of characters and bools of userinput, facilitating the process of denoting arguments/commands
+
+    //hashAndSlash will return vector of characters and bools of userinput, facilitating the process of denoting arguments/commands
     //cout << "specVec.first and specVec.second:" << endl;			
     //for(unsigned i = 0; i < specVec.size(); i++)							//for loop to output characters of commands from user input processed from hashAndSlash
 	//cout << specVec.at(i).first;
@@ -31,16 +32,16 @@ int main() {
     if(!specVec.empty()) {
       vector<pair<string, bool> > parsedVec = parse(specVec);			//parsedVec will be a vector of pairs of strings and bools composed of parse function
 																	//parse function should split up specVec into seperate strings. these strings being the user commands split up from connectors
-    //cout << "parsedVec.second and parsedVec.first:" << endl;
-    //for(unsigned i = 0; i < parsedVec.size(); i++)									//for loop to output boolean values and string values of newly "parsed" user input
-	//cout << parsedVec.at(i).second << ' ' << parsedVec.at(i).first << endl;
-    //cout << endl;
+      //cout << "parsedVec.second and parsedVec.first:" << endl;
+      //for(unsigned i = 0; i < parsedVec.size(); i++)									//for loop to output boolean values and string values of newly "parsed" user input
+      //cout << parsedVec.at(i).second << ' ' << parsedVec.at(i).first.size() << ' ' << parsedVec.at(i).first << endl;
+      //cout << endl;
 
-    //cout << "output:" << endl;
+      //cout << "output:" << endl;
     
       run(parsedVec);											//call run function of parsedVec.
     }
-    //
+    
     //char *c = new char[line.size() + 1];						//series of lines used to execute user commands
     //copy(line.begin(), line.end(), c);								
     //c[line.size()] = '\0';
