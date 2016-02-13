@@ -29,7 +29,7 @@ There are multiple checks in the *run()* to deal with incorrect input such as a 
 
 **Known Bugs:**
 
-**----More bugs commented in test cases**
+**-------More bugs commented in test cases**
 
 Input: *echo A && <ENTER> "A"*
 Experimental Rshell Output: **No such file or directory**
