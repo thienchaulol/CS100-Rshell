@@ -1,14 +1,12 @@
-CC = g++
-CC_FLAGS = -Wall -ansi
-EXEC = a.out
-SOURCES = $(wildcard *.cpp)
-OBJECTS = $(SOURCES:/cpp=.0)
+COMPILE = g++
+FLAGS = -Wall -Werror -ansi -pedantic
+OBJS = src/parse.h
 
-$(EXEC): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $(EXEC)
+all: rshell
 
-%.o: %.cpp
-	$(CC) -c $(CC_FLAGS) $< -o $@
+rshell:
+	$(COMPILE) $(FLAGS) -o rshell src/main.cpp src/parse.h $(OBJS) &&\
+	if [ ! -d bin ]; then mkdir bin; fi && mv rshell bin
 
 clean:
-	rm -f $(EXEC) $(OBJECTS)
+	rm -rf *~ bin
