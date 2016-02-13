@@ -40,7 +40,7 @@ int main() {
     
       run(parsedVec);											//call run function of parsedVec.
     }
-
+    //
     //char *c = new char[line.size() + 1];						//series of lines used to execute user commands
     //copy(line.begin(), line.end(), c);								
     //c[line.size()] = '\0';

@@ -46,7 +46,7 @@ bool execute(char **argv){				//function to execute commands from user
   }
   else {
     if(execvp(*argv, argv) < 0) {
-      perror(NULL);
+      perror(*argv);
       succeeded = false;
       kill(getpid(), 2);
     }

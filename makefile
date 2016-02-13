@@ -9,4 +9,4 @@ rshell:
 	if [ ! -d bin ]; then mkdir bin; fi && mv rshell bin
 
 clean:
-	rm -f *~ bin
+	rm -rf *~ bin
