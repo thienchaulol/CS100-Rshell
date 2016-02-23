@@ -8,41 +8,40 @@
 
 int main() {
 
-  while(1) {			//begin program
+  while(1) {		
     string line;
 
     struct passwd *passwd;
     passwd = getpwuid(getuid());
-    char buf[32];								//extra credit portion of assignment
-    gethostname(buf, sizeof buf);						//returns null-terminated hostname in the character array buf
-    cout << passwd->pw_name << '@' << buf << " $ ";		//$ will be the first character of the command line
+    char buf[32];					
+    gethostname(buf, sizeof buf);					
+    cout << passwd->pw_name << '@' << buf << " $ ";	
 
-    getline(cin, line);	//take in user input via command line
+    getline(cin, line);
 
-    vector<pair<char, bool> > specVec = hashAndSlash(line);			//specVec will be a vector of pairs of characters and bools composed by the hashAndSlash function
+    vector<pair<char, bool> > specVec = hashAndSlash(line);		
 
-    //hashAndSlash will return vector of characters and bools of userinput, facilitating the process of denoting arguments/commands
+
     //cout << "specVec.first and specVec.second:" << endl;			
-    //for(unsigned i = 0; i < specVec.size(); i++)							//for loop to output characters of commands from user input processed from hashAndSlash
+    //for(unsigned i = 0; i < specVec.size(); i++)						
 	//cout << specVec.at(i).first;
     //cout << endl;
-    //for(unsigned i = 0; i < specVec.size(); i++)							//for loop to output bool values of isAfterBackslash
+    //for(unsigned i = 0; i < specVec.size(); i++)							
 	//cout<< specVec.at(i).second;
     //cout << endl << endl;
     if(!specVec.empty()) {
-      vector<pair<string, bool> > parsedVec = parse(specVec);			//parsedVec will be a vector of pairs of strings and bools composed of parse function
-																	//parse function should split up specVec into seperate strings. these strings being the user commands split up from connectors
+      vector<pair<string, bool> > parsedVec = parse(specVec);
       //cout << "parsedVec.second and parsedVec.first:" << endl;
-      //for(unsigned i = 0; i < parsedVec.size(); i++)									//for loop to output boolean values and string values of newly "parsed" user input
+      //for(unsigned i = 0; i < parsedVec.size(); i++)									
       //cout << parsedVec.at(i).second << ' ' << parsedVec.at(i).first.size() << ' ' << parsedVec.at(i).first << endl;
       //cout << endl;
 
       //cout << "output:" << endl;
     
-      run(parsedVec);											//call run function of parsedVec.
+      run(parsedVec);											
     }
     
-    //char *c = new char[line.size() + 1];						//series of lines used to execute user commands
+    //char *c = new char[line.size() + 1];						
     //copy(line.begin(), line.end(), c);								
     //c[line.size()] = '\0';
     
