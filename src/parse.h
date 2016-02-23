@@ -316,5 +316,5 @@ void run(vector<pair<string, bool> > v) {
 	doIRun = true;								
       v.erase(v.begin());						
     }
-  }
+  }//why is git so difficult!
 }

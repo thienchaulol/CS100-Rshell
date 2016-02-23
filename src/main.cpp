@@ -20,7 +20,7 @@ int main() {
     getline(cin, line);
 
     vector<pair<char, bool> > specVec = hashAndSlash(line);		
-
+	//why is git so difficult!
 
     //cout << "specVec.first and specVec.second:" << endl;			
     //for(unsigned i = 0; i < specVec.size(); i++)						
