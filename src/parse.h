@@ -54,57 +54,24 @@ bool execute(char **argv){
 }
 
 vector<pair<char, bool> > hashAndSlash(string str) {
-  vector<pair<char, bool> > v;						
-  bool isInWord = false;						
+  vector<pair<char, bool> > v;
+
+  bool isInWord = false;
   bool isAfterBackslash = false;
-  bool allQuotesFound = true;	
+  bool allQuotesFound = true;
   bool isNormalChar = false;
+  bool doWhile = true;
+  int paranCount = 0;
+  string line = str;
 
-  for(unsigned i = 0; i < str.size(); i++) {
-    if(str.at(i) == ' ') {						
-      isInWord = false;					
-      v.push_back(pair<char, bool>(str.at(i), isNormalChar));
-    }
-    else {
-      if(str.at(i) == '#' && !isInWord && !isNormalChar)
-	break;
-      else if(str.at(i) == '\\' && (!isAfterBackslash || !isNormalChar)) {
-	if(i + 1 <= str.size() - 1) {											
-	  i++;														
-	  v.push_back(pair<char, bool>(str.at(i), true));						
-	}
-      }
-      else if(str.at(i) == '"') {
-	if(allQuotesFound == true) { 
-	  allQuotesFound = false;		
-	  isNormalChar = true;
-	  v.push_back(pair<char, bool>(str.at(i), false));
-	}
-	else if(!allQuotesFound) {
-	  allQuotesFound = true;	
-	  isNormalChar = false;
-	  v.push_back(pair<char, bool>(str.at(i), false));			
-	}						
-      }
-      else
-	v.push_back(pair<char, bool>(str.at(i), isNormalChar));
-      isInWord = true;
-    }
-  }
-
-  while(!allQuotesFound) {			
-    string line;
-    
-    cout << "> ";						
-    getline(cin, line);		
-
-    for(unsigned i = 0; i < line.size(); i++) {									
+  while(doWhile) { 
+    for(unsigned i = 0; i < line.size(); i++) {
       if(line.at(i) == ' ') {
 	isInWord = false;
 	v.push_back(pair<char, bool>(line.at(i), isNormalChar));
       }
       else {
-	if(line.at(i) == '#' && !isInWord)
+	if(line.at(i) == '#' && !isInWord && !isNormalChar)
 	  break;
 	else if(line.at(i) == '\\' && (!isAfterBackslash || !isNormalChar)) {
 	  if(i + 1 <= line.size() - 1) {
@@ -113,24 +80,45 @@ vector<pair<char, bool> > hashAndSlash(string str) {
 	  }
 	}
 	else if(line.at(i) == '"') {
-	  if(allQuotesFound) { 
+	  if(allQuotesFound) {
 	    allQuotesFound = false;
 	    isNormalChar = true;
-	    v.push_back(pair<char, bool>(str.at(i), false));
+	    if(i + 1 <= line.size() - 1) {
+	      i++;
+	      v.push_back(pair<char, bool>(line.at(i), true));
+	    }
 	  }
 	  else if(!allQuotesFound) {
 	    allQuotesFound = true;
 	    isNormalChar = false;
-	    v.push_back(pair<char, bool>(str.at(i), false));
+	    if(i + 1 <= line.size() - 1) {
+	      i++;
+	      v.push_back(pair<char, bool>(line.at(i), false));
+	    }
 	  }
+	}
+	else if(line.at(i) == '(' && !isNormalChar) {
+	  paranCount++;
+	  v.push_back(pair<char, bool>(line.at(i), false));
+	}
+	else if(line.at(i) == ')' && !isNormalChar) {
+	  paranCount--;
+	  v.push_back(pair<char, bool>(line.at(i), false));
 	}
 	else
 	  v.push_back(pair<char, bool>(line.at(i), isNormalChar));
 	isInWord = true;
       }
-    } 
+    }
+    if(allQuotesFound && paranCount == 0) {
+      doWhile = false;
+    }
+    else{
+      cout << "> ";
+      getline(cin, line);
+    }
   }
-  return v;		
+  return v;
 }
 
 vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {
@@ -274,7 +262,7 @@ void run(vector<pair<string, bool> > v) {
   }
   while(!v.empty()) {							
     if(v.at(0).second == 0 && doIRun) {	
-      unsigned lineSize = v.at(0).first.size() + 1;		//
+      unsigned lineSize = v.at(0).first.size() + 1;
       char **argv = new char*[lineSize];
       
       char *c = new char[lineSize];
