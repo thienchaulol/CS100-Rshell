@@ -225,11 +225,13 @@ void run(vector<pair<string, bool> > v) {
   bool prevCom = true; 							
   bool doIRun = true;						
   
-  if(v.at(0).second == 1) {
+  if((v.at(0).second && v.at(0).first.at(0) == '&')
+     || (v.at(0).second && v.at(0).first.at(0) == '|')
+     || (v.at(0).second && v.at(0).first.at(0) == ';')) {
     cout << "syntax error near unexpected token `" << v.at(0).first << "'" << endl;
     return;
   }
-  while(!v.empty()) {							
+  while(!v.empty()) {
     if(v.at(0).second == 0 && doIRun) {	
       unsigned lineSize = v.at(0).first.size() + 1;
       char **argv = new char*[lineSize];
@@ -241,7 +243,7 @@ void run(vector<pair<string, bool> > v) {
       finalParse(c, argv);
       char curDir[100];
       getcwd(curDir, 100);
-      if(strcmp(argv[0], "exit") == 0) 
+      if(strcmp(*argv, "exit") == 0) 
 	exit(0);
       if(strcmp(*argv, "cd") == 0) 
 	chdir(argv[1]);
@@ -260,12 +262,12 @@ void run(vector<pair<string, bool> > v) {
 	  doIRun = false;						
       } 
       else if(v.at(0).first == "||" || v.at(0).first == "|") {	
-	if(prevCom)														
-	  doIRun = false;													
+	if(prevCom)	
+	  doIRun = false;		
 	else
-	  doIRun = true;												
+	  doIRun = true;
       }
-      else if(v.at(0).first == "&") {												
+      else if(v.at(0).first == "&") {					
 	cout << "syntax error near unexpected token '" << v.at(0).first << "'" << endl;	
 	return;
       }
