@@ -121,135 +121,104 @@ vector<pair<char, bool> > hashAndSlash(string str) {
   return v;
 }
 
-vector<pair<string, bool> > parse(vector<pair<char, bool> > v) {
-  vector<pair<string, bool> > s;								
+vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
+  vector<pair<char, bool> > v = specVec;
+  vector<pair<string, bool> > s;
+  bool doWhile = true;
 
-  while(!v.empty()){
-    string command;														
-    string connector;													
-    
-    while(v.at(0).first == ' ')										
-      v.erase(v.begin());											
+  while(doWhile) {
+    while(!v.empty()) {
+      string command;
+      string connector;
 
-    unsigned i = 0;
-    for(i = 0; i < v.size(); i++){										
-      if(v.at(i).first == '&' && !v.at(i).second)				
-	break;
-      else if(v.at(i).first == '|' && !v.at(i).second)				
-	break;
-      else if(v.at(i).first == ';' && !v.at(i).second)			
-	break;
-    }
-
-    for(unsigned j = 0; j < i; j++) {									
-      if(v.at(0).first == '\\' && !v.at(0).second)		
+      while(v.at(0).first == ' '
+	    || v.at(0).first == '\t'
+	    || v.at(0).first == '\n')
 	v.erase(v.begin());
-      else if(v.at(0).first == '\"' && !v.at(0).second) {
-	command += v.at(0).first;
-	v.erase(v.begin());
-      }														
-      else {														
-	command += v.at(0).first;												
-	v.erase(v.begin());														
-      }
-    }
 
-    if(!v.empty()) {													
-      if(v.at(0).first == '&' || v.at(0).first == '|') {					
-	connector += v.at(0).first;													
-	v.erase(v.begin());															
-      }
-      if(!v.empty()) {
-	if(v.at(0).first == '&' || v.at(0).first == '|') {				
-	  connector += v.at(0).first;
-	  v.erase(v.begin());
-	}
-	else if(v.at(0).first == ';') {										
-	  connector += v.at(0).first;												
-	  v.erase(v.begin());														
-	}
-      }
-    }
-
-    if(!command.empty()) {
-      while(command.at(command.size() - 1) == ' '
-	    || command.at(command.size() - 1) == '\t'
-	    || command.at(command.size() - 1) == '\n') 
-	command.erase(command.size() - 1, 1);											
-      s.push_back(pair<string, bool>(command, false));
-    }						
-    if(!connector.empty())											
-      s.push_back(pair<string, bool>(connector, true));						
-  }
-
-  while((s.at(s.size() - 1).second && s.at(s.size() - 1).first == "&&")
-	|| (s.at(s.size() - 1).second && s.at(s.size() - 1).first == "||")
-	|| (s.at(s.size() - 1).second && s.at(s.size() - 1).first == "|")) {	
-    string line;
-    
-    cout << "> ";
-    getline(cin, line);												
-
-    vector<pair<char, bool> > v2 = hashAndSlash(line);				
-
-    while(!v2.empty()){													
-      string command;														
-      string connector;														
-    
-      while(v2.at(0).first == ' ')
-	v2.erase(v2.begin());
-
+      while(v.at(v.size() - 1).first == ' '
+	    || v.at(v.size() - 1).first == '\t'
+	    || v.at(v.size() - 1).first == '\n')
+	v.erase(v.end());
+	 
       unsigned i = 0;
-      for(i = 0; i < v2.size(); i++) {
-	if(v2.at(i).first == '&' && !v2.at(i).second)
+      for(i = 0; i < v.size(); i++) {
+	if(v.at(i).first == '&' && !v.at(i).second)
 	  break;
-	else if(v2.at(i).first == '|' && !v2.at(i).second)
+	else if(v.at(i).first == '|' && !v.at(i).second)
 	  break;
-	else if(v2.at(i).first == ';' && !v2.at(i).second)
+	else if(v.at(i).first == ';' && !v.at(i).second)
+	  break;
+	else if(v.at(i).first == '(' && !v.at(i).second)
+	  break;
+	else if(v.at(i).first == ')' && !v.at(i).second)
 	  break;
       }
 
       for(unsigned j = 0; j < i; j++) {
-	if(v2.at(0).first == '\\' && !v2.at(0).second)
-	  v2.erase(v2.begin());
-	else if(v.at(0).first == '\"' && !v.at(0).second) {
+	if(v.at(0).first == '\\' && !v.at(0).second)
 	  v.erase(v.begin());
+	else if(v.at(0).first == '"' && !v.at(0).second) {
 	  command += v.at(0).first;
+	  v.erase(v.begin());
 	}
 	else {
-	  command += v2.at(0).first;
-	  v2.erase(v2.begin());
+	  command += v.at(0).first;
+	  v.erase(v.begin());
 	}
       }
 
-      if(!v2.empty()) {
-	if(v2.at(0).first == '&' || v2.at(0).first == '|') {
-	  connector += v2.at(0).first;
-	  v2.erase(v2.begin());
+      if(!v.empty()) {
+	if(v.at(0).first == '&' || v.at(0).first == '|') {
+	  connector += v.at(0).first;
+	  v.erase(v.begin());
 	}
-	if(v2.at(0).first == '&' || v2.at(0).first == '|') {
-	  connector += v2.at(0).first;
-	  v2.erase(v2.begin());
-	}
-	else if(v2.at(0).first == ';') {
-	  connector += v2.at(0).first;
-	  v2.erase(v2.begin());
+	if(!v.empty()) {
+	  if(v.at(0).first == '&' || v.at(0).first == '|') {
+	    connector += v.at(0).first;
+	    v.erase(v.begin());
+	  }
+	  else if(v.at(0).first == ';') {
+	    connector += v.at(0).first;
+	    v.erase(v.begin());
+	  }
+	  else if(v.at(0).first == '(') {
+	    connector += v.at(0).first;
+	    v.erase(v.begin());
+	  }
+	  else if(v.at(0).first == ')') {
+	    connector += v.at(0).first;
+	    v.erase(v.begin());
+	  }
 	}
       }
       
       if(!command.empty()) {
 	while(command.at(command.size() - 1) == ' '
 	      || command.at(command.size() - 1) == '\t'
-	      || command.at(command.size() - 1) == '\n') 
+	      || command.at(command.size() - 1) == '\n')
 	  command.erase(command.size() - 1, 1);
-	s.push_back(pair<string, bool>(command, false));
+	if(!command.empty())
+	  s.push_back(pair<string, bool>(command, false));
       }
       if(!connector.empty())
-	s.push_back(pair<string, bool>(connector, true));      
+	s.push_back(pair<string, bool>(connector, true));
+    }
+
+    if(!((s.at(s.size() - 1).second && s.at(s.size() - 1).first == "&&")
+	 || (s.at(s.size() - 1).second && s.at(s.size() - 1).first == "||")
+	 || (s.at(s.size() - 1).second && s.at(s.size() - 1).first == "|")))
+      doWhile = false;
+    else {
+      string line;
+
+      cout << "> ";
+      getline(cin, line);
+
+      v = hashAndSlash(line);
     }
   }
-
-  return s;			
+  return s;
 }
 
 void run(vector<pair<string, bool> > v) {		
