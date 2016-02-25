@@ -232,7 +232,7 @@ void run(vector<pair<string, bool> > v) {
     return;
   }
   while(!v.empty()) {
-    if(v.at(0).second == 0 && doIRun) {	
+    if(!v.at(0).second && doIRun) {	
       unsigned lineSize = v.at(0).first.size() + 1;
       char **argv = new char*[lineSize];
       
@@ -271,12 +271,23 @@ void run(vector<pair<string, bool> > v) {
 		run_bracketTest(v);
 	}
 //----------------------------------------2/24/2016
+
       else {
 	prevCom = execute(argv);		
 	v.erase(v.begin());				
       }
-    }  
-    else if(v.at(0).second == 0 && !doIRun) 
+    }
+    else if(v.at(0).second && !doIRun && v.at(0).first == "(") {
+      int paranCount = 0;
+      do {
+	if(v.at(0).second && v.at(0).first == "(")
+	  paranCount++;
+	else if(v.at(0).second && v.at(0).first == ")")
+	  paranCount--;
+	v.erase(v.begin());
+      } while(paranCount != 0);
+    }
+    else if(!v.at(0).second && !doIRun) 
       v.erase(v.begin());					
     if(!v.empty()) {					
       if(v.at(0).first == "&&") {			
@@ -302,12 +313,12 @@ void run(vector<pair<string, bool> > v) {
   }//why is git so difficult!
 }
 //----------------------------------------2/24/2016
-void run_test(vector<pair<string,bool>> vec){
+void run_test(vector<pair<string,bool> > vec){
 	//the user's parsed input will be passed in
 	//if it begins with "test"
 }
 
-void run_bracketTest(vector<pair<string,bool>> vec){
+void run_bracketTest(vector<pair<string,bool> > vec){
 	//the user's parsed input will be passed in
 	//if it begins with "["
 }
