@@ -247,6 +247,30 @@ void run(vector<pair<string, bool> > v) {
 	exit(0);
       if(strcmp(*argv, "cd") == 0) 
 	chdir(argv[1]);
+
+//----------------------------------------2/24/2016
+	//if the user inputs test, go to seperate case that doesn't use execvp
+	if(strcmp(*argv, "test") == 0){
+		//call a seperate function to complete the command
+		
+		//cout << "Test case" << endl;
+		//exit(0);	
+		
+		//run_test(vector<pair<string,bool>> vec) is a function that will
+		//run our own implemented version of the bash test command
+		run_test(v);
+	}
+	if(strcmp(*argv, "[") == 0){
+		//call a seperate function to complete the command
+	
+		//cout << "Bracket case" << endl;
+		//exit(0);
+		
+		//run_bracketTest(vector<pair<string,bool>> vec) is a function that will 
+		//run our own implemented version of the bash test command
+		run_bracketTest(v);
+	}
+//----------------------------------------2/24/2016
       else {
 	prevCom = execute(argv);		
 	v.erase(v.begin());				
@@ -277,3 +301,14 @@ void run(vector<pair<string, bool> > v) {
     }
   }//why is git so difficult!
 }
+//----------------------------------------2/24/2016
+void run_test(vector<pair<string,bool>> vec){
+	//the user's parsed input will be passed in
+	//if it begins with "test"
+}
+
+void run_bracketTest(vector<pair<string,bool>> vec){
+	//the user's parsed input will be passed in
+	//if it begins with "["
+}
+//----------------------------------------2/24/2016
