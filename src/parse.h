@@ -53,6 +53,29 @@ bool execute(char **argv){
   return succeeded;
 }
 
+bool paranChecker(vector<pair<char, bool> > v) {
+  bool isClosed = true;
+  vector<pair<char, bool> >::iterator open = v.begin();
+  vector<pair<char, bool> >::iterator closed = v.end();
+
+  for(closed = v.begin(); closed != v.end(); closed++) {
+    if(!closed->second && closed->first == ')') {
+      isClosed = false;
+      for(open = closed; open != v.begin(); open--) {
+	if(!open->second && open->first == '(') {
+	  cout << "test" << endl;
+	  open->second = true;
+	  isClosed = true;
+	  break;
+	}
+      }
+    }
+  }
+  if(!isClosed && !v.at(0).second && v.at(0).first == '(')
+    return true;
+  return isClosed;
+}
+
 vector<pair<char, bool> > hashAndSlash(string str) {
   vector<pair<char, bool> > v;
 
@@ -109,6 +132,11 @@ vector<pair<char, bool> > hashAndSlash(string str) {
 	  v.push_back(pair<char, bool>(line.at(i), isNormalChar));
 	isInWord = true;
       }
+    }
+    if(!paranChecker(v)) {
+      while(!v.empty())
+	v.pop_back();
+      return v;
     }
     if(allQuotesFound && paranCount == 0) {
       doWhile = false;
@@ -247,7 +275,7 @@ void run(vector<pair<string, bool> > v) {
 	exit(0);
       if(strcmp(*argv, "cd") == 0) 
 	chdir(argv[1]);
-
+      /*
 //----------------------------------------2/24/2016
 	//if the user inputs test, go to seperate case that doesn't use execvp
 	if(strcmp(*argv, "test") == 0){
@@ -271,7 +299,7 @@ void run(vector<pair<string, bool> > v) {
 		run_bracketTest(v);
 	}
 //----------------------------------------2/24/2016
-
+*/
       else {
 	prevCom = execute(argv);		
 	v.erase(v.begin());				

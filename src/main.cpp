@@ -19,7 +19,12 @@ int main() {
 
     getline(cin, line);
 
-    vector<pair<char, bool> > specVec = hashAndSlash(line);		
+    vector<pair<char, bool> > specVec = hashAndSlash(line);
+
+    if(specVec.empty()) {
+      cout << "syntax error near unexpected token `)'" << endl;
+      continue;
+    }
 	//why is git so difficult!
     cout << "specVec.first and specVec.second:" << endl;
     for(unsigned i = 0; i < specVec.size(); i++)						
