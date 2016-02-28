@@ -11,6 +11,7 @@
 #include <sys/stat.h>	//assignment 3
 #include <cstring>
 #include <string>
+#include <limits.h>
 
 using namespace std;
 
@@ -309,9 +310,69 @@ void run_test(vector<pair<string,bool> > vec){
 	bool isADirectory = false;
 	bool isARegularFile = false;
 	bool exists = false;	
+	//*******IMPORTANT:implement check to see if user entered "test" in the portion "/test/file/path"
+
+	//implement change directory code to change directories
+	//if it is not the default case, directory's locatioin will be
+	//specified from vec.at(7).first to vec.end()
+	//store that in a string
+
+	//*******ONLY WORKS FOR NON-DEFAULT CASE: MUST BE IN FORMAT: "test -e /test/main/path/path1/path2/...."
+	//desired path stored in pathVec. const char* in order to use chdir later
+	vector<const char*> pathVec;
+	for(int i = 7; i < vec.size(); i++){
+
+		unsigned lineSize = vec.at(i).first.size() + 1;
+		char **argv = new char*[lineSize];
+		char *c = new char[lineSize];
+		copy(vec.at(i).first.begin(), vec.at(i).first.end(), c);
+		c[vec.at(i).first.size()] = '\0';
+
+		cout << "Path being pushed back: " << c << endl;
+		pathVec.push_back(c);
+	}
+	
+	//output current directory	
+	char* cwd;
+    char buff[PATH_MAX + 1];
+
+    cwd = getcwd( buff, PATH_MAX + 1 );
+
+	//int cwdLength = sizeof(cwd);
+	//cout << "Initial directory char* array size: " << cwdLength << endl;
+
+    if( cwd != NULL ) {
+		cout  << "The initial working directory is : " << cwd << endl;
+	}
+	string initWorkDirec = cwd;
+	
+	//change to desired directory via a for loop
+	//once done with check, change back to initial directory
+	//increment by two to avoid "/"
+	for(int i = 0; i < pathVec.size(); i = i + 2){
+		cout << "Paths: " << pathVec.at(i) << endl;
+		chdir(pathVec.at(i));
+	}
+	
+	cwd = getcwd( buff, PATH_MAX + 1 );
+	if( cwd != NULL ) {
+		cout  << "The desired working directory is : " << cwd << endl;
+	}
+//*****************-----------------------------11:23PM 2/27----------------*********************
+	//code to return to initial directory
+	//initial working directory stored in initWorkDirec
+	//and then chdir() in back to the initial working directory
+
+	//cwdLength = sizeof(cwd);
+	//cout << "Final directory char* array size: " << cwdLength << endl;
+	if( cwd != NULL ) {
+		cout  << "The final working directory is : " << cwd << endl;
+	}
+//*****************-----------------------------11:23PM 2/27----------------*********************
+	return;
 	
 	//***********default case*************
-	if(vec.size() == 7){
+	if(vec.size() == 7 && vec.at(3).first == "test"){
 		string x = vec.at(4).first;
 		//cout << "DEFAULT VALUE FIRST: " << vec.at(0).first << endl;
 		struct stat buffer;
@@ -338,7 +399,7 @@ void run_test(vector<pair<string,bool> > vec){
 	}
 	
 //3:25 PM "-f"
-	if(vec.at(1).first == "f"){
+	if(vec.at(1).first == "f" && vec.at(3).first == "test"){
 		//f checks if file/directory exists AND is a "regular" file
 		//REGULAR FILE MEANING : NOT A DIRECTORY OR A "PIPE". couldn't implement pipe check
 		//d checks if file/directory exists AND is a directory
@@ -379,7 +440,7 @@ void run_test(vector<pair<string,bool> > vec){
 		}
 
 	}
-	else if(vec.at(1).first == "d"){
+	else if(vec.at(1).first == "d" && vec.at(3).first == "test"){
 		//d checks if file/directory exists AND is a directory
 		struct stat buffer;
 		//yanked from other run()
@@ -405,7 +466,7 @@ void run_test(vector<pair<string,bool> > vec){
 		}
 	}
 
-	else if(vec.at(1).first == "e"){
+	else if(vec.at(1).first == "e" && vec.at(3).first == "test"){
 		//run existential case
 		struct stat buffer;
 		//yanked from other run()
