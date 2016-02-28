@@ -12,6 +12,7 @@
 #include <cstring>
 #include <string>
 #include <limits.h>
+#include <string.h>
 
 using namespace std;
 
@@ -310,6 +311,7 @@ void run_test(vector<pair<string,bool> > vec){
 	bool isADirectory = false;
 	bool isARegularFile = false;
 	bool exists = false;	
+	bool nonDefaultCase = false;
 	//*******IMPORTANT:implement check to see if user entered "test" in the portion "/test/file/path"
 
 	//implement change directory code to change directories
@@ -317,8 +319,9 @@ void run_test(vector<pair<string,bool> > vec){
 	//specified from vec.at(7).first to vec.end()
 	//store that in a string
 
-	//*******ONLY WORKS FOR NON-DEFAULT CASE: MUST BE IN FORMAT: "test -e /test/main/path/path1/path2/...."
+			//*******ONLY WORKS FOR NON-DEFAULT CASE: MUST BE IN FORMAT: "test -e /test/main/path/path1/path2/...."
 	//desired path stored in pathVec. const char* in order to use chdir later
+
 	vector<const char*> pathVec;
 	for(int i = 7; i < vec.size(); i++){
 
@@ -328,48 +331,91 @@ void run_test(vector<pair<string,bool> > vec){
 		copy(vec.at(i).first.begin(), vec.at(i).first.end(), c);
 		c[vec.at(i).first.size()] = '\0';
 
-		cout << "Path being pushed back: " << c << endl;
+		//cout << "Path being pushed back: " << c << endl;
 		pathVec.push_back(c);
 	}
 	
 	//output current directory	
 	char* cwd;
     char buff[PATH_MAX + 1];
-
+	//getcwd() returns a pointer to a string
+	//containing the path name of the current working directory
     cwd = getcwd( buff, PATH_MAX + 1 );
 
-	//int cwdLength = sizeof(cwd);
-	//cout << "Initial directory char* array size: " << cwdLength << endl;
+	int initWorkDirecSize = strlen(cwd);
+//	cout << "Initial directory char* array size: " << initWorkDirecSize << endl;
 
-    if( cwd != NULL ) {
-		cout  << "The initial working directory is : " << cwd << endl;
-	}
-	string initWorkDirec = cwd;
+	char* initWorkDirec = cwd;
+//	if( cwd != NULL ) {
+//		cout  << "The initial working directory is : " << initWorkDirec << endl;
+//	}
 	
 	//change to desired directory via a for loop
 	//once done with check, change back to initial directory
 	//increment by two to avoid "/"
 	for(int i = 0; i < pathVec.size(); i = i + 2){
-		cout << "Paths: " << pathVec.at(i) << endl;
+		//cout << "Paths: " << pathVec.at(i) << endl;
 		chdir(pathVec.at(i));
 	}
-	
-	cwd = getcwd( buff, PATH_MAX + 1 );
-	if( cwd != NULL ) {
-		cout  << "The desired working directory is : " << cwd << endl;
-	}
+	char buff2[PATH_MAX + 1];
+	cwd = getcwd( buff2, PATH_MAX + 1 );
+//	if( cwd != NULL ) {
+//		cout  << "The desired working directory is : " << cwd << endl;
+//	}
+	int finWorkDirecSize = strlen(cwd);
 //*****************-----------------------------11:23PM 2/27----------------*********************
 	//code to return to initial directory
 	//initial working directory stored in initWorkDirec
 	//and then chdir() in back to the initial working directory
 
-	//cwdLength = sizeof(cwd);
-	//cout << "Final directory char* array size: " << cwdLength << endl;
-	if( cwd != NULL ) {
-		cout  << "The final working directory is : " << cwd << endl;
+	//number of characters to copy from source
+	//starting from offset
+	int numCharToCopy = (initWorkDirecSize - strlen(cwd)) - 1;
+	//returnDir will have (numCharToCopy) characters + 1 for null char '\0'
+//cout << "strlen(initWorkDirec): " << initWorkDirecSize << endl;
+//cout << "strlen(cwd): " << strlen(cwd) << endl;
+//cout << "numCharToCopy: " << numCharToCopy << endl;	
+
+	int currWorkDirecSize = strlen(cwd);
+	//offset is strlen(cwd) + 1 because want
+	//to copy everything after cwd/(.........)
+	int offset = strlen(cwd) + 1;
+//cout << "offset: " << offset << endl;
+
+	unsigned Size = initWorkDirecSize - (currWorkDirecSize + 2);
+	char* returnDir = new char[Size];
+	/*declaring i outside of for loop and inside prevents seg fault*/
+	unsigned int i = 0;
+	for(unsigned int i = 0; i < (initWorkDirecSize - currWorkDirecSize) - 1; i++){
+		returnDir[i] = initWorkDirec[offset + i];
 	}
+	returnDir[Size + 1] = '\0';
+//cout << "Path to return to initial directory: " << returnDir <<endl;
+	
+/*add this snippet of code to the end of runTest to return to initial directory*/
+		/*12:24 PM 2/28*/
+			/*snippet only currently works for a single change in directory*/
+				/*if path is set to "/../.." a nasty pointer error pops up*/
+				/*the error is: munmap_chunk()..... */
+			/*--->the initial directory is restored but program crashes<---*/
+		/*1:05 PM 2/28*/
+			/*snippet works for multiple changes in directory*/
+				/*had to allocate memory for returnDir with "new char[Size]*/
+//	chdir(returnDir);
+
+//	char buff3[PATH_MAX + 1];
+//	cwd = getcwd( buff3, PATH_MAX + 1);
+//	cout << "Final directory char* array size: " << strlen(cwd) << endl;
+//cout << "char* array at [34] , [35]: " << cwd[34] << " " << cwd[35] << endl;
+//	if( cwd != NULL ) {
+//		cout  << "The final working directory is : " << cwd << endl;
+//	}
+/*add this snippet of code to the end of runTest to return to initial directory*/
+
+			//*******ONLY WORKS FOR NON-DEFAULT CASE: MUST BE IN FORMAT: "test -e /test/main/path/path1/path2/...."
+	
 //*****************-----------------------------11:23PM 2/27----------------*********************
-	return;
+//	return;
 	
 	//***********default case*************
 	if(vec.size() == 7 && vec.at(3).first == "test"){
@@ -388,12 +434,10 @@ void run_test(vector<pair<string,bool> > vec){
 		//use stat() to check if file exists, adapted from sources
 		if(stat (c, &buffer) == 0){
 			cout << "(True)" << endl;
-			cout << "path exists" << endl;
 			exists = true;
 		}
 		else{
 			cout << "(False)" << endl;
-			cout << "path doesn't exist" << endl;
 		}
 		return;
 	}
@@ -432,11 +476,9 @@ void run_test(vector<pair<string,bool> > vec){
 		}
 		if(!isADirectory && exists){
 			cout << "(True)" << endl;
-			cout << "path exists" << endl;
 		}
 		else{
 			cout << "(False)" << endl;
-			cout << "path doesn't exist" << endl;
 		}
 
 	}
@@ -457,12 +499,10 @@ void run_test(vector<pair<string,bool> > vec){
 		}
 		if(buffer.st_mode & S_IFDIR){
 			cout << "(True)" << endl;
-			cout << "path exists" << endl;
 			isADirectory = true;
 		}
 		else{
 			cout << "(False)" << endl;
-			cout << "path doesn't exist" << endl;
 		}
 	}
 
@@ -481,14 +521,31 @@ void run_test(vector<pair<string,bool> > vec){
 		//use stat() to check if file exists, adapted from sources
 		if(stat (c, &buffer) == 0){
 			cout << "(True)" << endl;
-			cout << "path exists" << endl;
 			exists = true;
 		}
 		else{
 			cout << "(False)" << endl;
-			cout << "path doesn't exist" << endl;
 		}
 	}
+/*add this snippet of code to the end of runTest to return to initial directory*/
+		/*12:24 PM 2/28*/
+			/*snippet only currently works for a single change in directory*/
+				/*if path is set to "/../.." a nasty pointer error pops up*/
+				/*the error is: munmap_chunk()..... */
+			/*--->the initial directory is restored but program crashes<---*/
+		/*1:05 PM 2/28*/
+			/*snippet works for multiple changes in directory*/
+				/*had to allocate memory for returnDir with "new char[Size]*/
+	chdir(returnDir);
+
+	char buff3[PATH_MAX + 1];
+	cwd = getcwd( buff3, PATH_MAX + 1);
+//	cout << "Final directory char* array size: " << strlen(cwd) << endl;
+//cout << "char* array at [34] , [35]: " << cwd[34] << " " << cwd[35] << endl;
+//	if( cwd != NULL ) {
+//		cout  << "The final working directory is : " << cwd << endl;
+///	}
+/*add this snippet of code to the end of runTest to return to initial directory*/
 	return;
 }
 
