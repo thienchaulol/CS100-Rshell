@@ -8,6 +8,10 @@
 #include <sys/types.h>
 #include <pwd.h>
 
+#include <sys/stat.h>	//assignment 3
+#include <cstring>
+#include <string>
+
 using namespace std;
 
 void finalParse(char *line, char **argv) {
@@ -181,9 +185,21 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
 	  break;
 	else if(v.at(i).first == ')' && !v.at(i).second)
 	  break;
+
+//---assign 3
+	else if(v.at(i).first == '-' && !v.at(i).second)
+		break;
+	else if(v.at(i).first == '/' && !v.at(i).second)
+		break;
+	else if(v.at(i).first == '[' && !v.at(i).second)
+		break;
+	else if(v.at(i).first == ']' && !v.at(i).second)
+		break;
       }
 
       for(unsigned j = 0; j < i; j++) {
+		
+
 	if(v.at(0).first == '\\' && !v.at(0).second)
 	  v.erase(v.begin());
 	else if(v.at(0).first == '"' && !v.at(0).second) {
@@ -195,6 +211,43 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
 	  v.erase(v.begin());
 	}
       }
+
+//treat '-' as a connector
+	if(!v.empty()){
+		if(v.at(0).first == '-'){
+			//add '-' to connector
+			//connector += v.at(0).first;
+			//erase '-'
+			v.erase(v.begin());
+			//add 'e', 'f', or 'd' to connector
+			connector += v.at(0).first;
+			//erase
+			v.erase(v.begin());
+		}
+	}
+
+//treat '/' as a connector
+	if(!v.empty()){
+		if(v.at(0).first == '/'){
+			connector += v.at(0).first;
+			v.erase(v.begin());
+		}
+	}
+
+//treat '[' as a connector
+	if(!v.empty()){
+		if(v.at(0).first == '['){
+			connector += v.at(0).first;
+			v.erase(v.begin());
+		}
+	}
+//treat ']' as a connector
+	if(!v.empty()){
+		if(v.at(0).first == ']'){
+			connector += v.at(0).first;
+			v.erase(v.begin());
+		}
+	}
 
       if(!v.empty()) {
 	if(v.at(0).first == '&' || v.at(0).first == '|') {
@@ -249,6 +302,148 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
   return s;
 }
 
+//----------------------------------------2/24/2016
+void run_test(vector<pair<string,bool> > vec){
+	//the user's parsed input will be passed in
+	//if it begins with "test"
+	bool isADirectory = false;
+	bool isARegularFile = false;
+	bool exists = false;	
+	
+	//***********default case*************
+	if(vec.size() == 7){
+		string x = vec.at(4).first;
+		//cout << "DEFAULT VALUE FIRST: " << vec.at(0).first << endl;
+		struct stat buffer;
+		//yanked from other run()
+		//need to convert string to c_str for reasons unknown
+		unsigned lineSize = vec.at(4).first.size() + 1;
+		char **argv = new char*[lineSize];
+
+		char *c = new char[lineSize];
+		copy(vec.at(4).first.begin(), vec.at(4).first.end(), c);
+		c[vec.at(4).first.size()] = '\0';
+		
+		//use stat() to check if file exists, adapted from sources
+		if(stat (c, &buffer) == 0){
+			cout << "(True)" << endl;
+			cout << "path exists" << endl;
+			exists = true;
+		}
+		else{
+			cout << "(False)" << endl;
+			cout << "path doesn't exist" << endl;
+		}
+		return;
+	}
+	
+//3:25 PM "-f"
+	if(vec.at(1).first == "f"){
+		//f checks if file/directory exists AND is a "regular" file
+		//REGULAR FILE MEANING : NOT A DIRECTORY OR A "PIPE". couldn't implement pipe check
+		//d checks if file/directory exists AND is a directory
+		struct stat buffer;
+		//yanked from other run()
+		//need to convert string to c_str for reasons unknown
+		unsigned lineSize = vec.at(5).first.size() + 1;
+		char **argv = new char*[lineSize];
+      
+		char *c = new char[lineSize];
+		copy(vec.at(5).first.begin(), vec.at(5).first.end(), c);
+		c[vec.at(5).first.size()] = '\0';
+
+		//checking if file is a directory, if it isn't then it's a regular file
+		//fails to check if file is a "pipe". got errors using:
+		//				S_ISREG(c.st_mode);
+		//		to check whether is a file is a regular file
+		//		S_ISREG was not declared, but I included the correct libraries..idk
+		if(stat(c, &buffer) != 0){
+			cout << "cannot access" << endl;
+		}
+		else if(buffer.st_mode & S_IFDIR){
+			isADirectory = true;
+		}
+		else if(stat (c, &buffer) == 0){
+			exists = true;
+		}
+		else{
+			isADirectory = false;
+		}
+		if(!isADirectory && exists){
+			cout << "(True)" << endl;
+			cout << "path exists" << endl;
+		}
+		else{
+			cout << "(False)" << endl;
+			cout << "path doesn't exist" << endl;
+		}
+
+	}
+	else if(vec.at(1).first == "d"){
+		//d checks if file/directory exists AND is a directory
+		struct stat buffer;
+		//yanked from other run()
+		//need to convert string to c_str for reasons unknown
+		unsigned lineSize = vec.at(5).first.size() + 1;
+		char **argv = new char*[lineSize];
+      
+		char *c = new char[lineSize];
+ 		copy(vec.at(5).first.begin(), vec.at(5).first.end(), c);
+		c[vec.at(5).first.size()] = '\0';
+		
+		if(stat(c, &buffer) != 0){
+			cout << "cannot access" << endl;
+		}
+		if(buffer.st_mode & S_IFDIR){
+			cout << "(True)" << endl;
+			cout << "path exists" << endl;
+			isADirectory = true;
+		}
+		else{
+			cout << "(False)" << endl;
+			cout << "path doesn't exist" << endl;
+		}
+	}
+
+	else if(vec.at(1).first == "e"){
+		//run existential case
+		struct stat buffer;
+		//yanked from other run()
+		//need to convert string to c_str for reasons unknown
+      	unsigned lineSize = vec.at(5).first.size() + 1;
+      	char **argv = new char*[lineSize];
+      
+     	char *c = new char[lineSize];
+	    copy(vec.at(5).first.begin(), vec.at(5).first.end(), c);
+     	c[vec.at(5).first.size()] = '\0';
+		
+		//use stat() to check if file exists, adapted from sources
+		if(stat (c, &buffer) == 0){
+			cout << "(True)" << endl;
+			cout << "path exists" << endl;
+			exists = true;
+		}
+		else{
+			cout << "(False)" << endl;
+			cout << "path doesn't exist" << endl;
+		}
+	}
+	return;
+}
+
+void run_bracketTest(vector<pair<string,bool> > vec){
+	//the user's parsed input will be passed in
+	//if it begins with "["
+	
+	int j = vec.size();
+	string x = vec.at(j).first;
+	if(x != "]"){
+		cout << "Incomplete brackets" << endl;
+		return;
+	}
+}
+//----------------------------------------2/24/2016
+
 void run(vector<pair<string, bool> > v) {		
   bool prevCom = true; 							
   bool doIRun = true;						
@@ -275,31 +470,30 @@ void run(vector<pair<string, bool> > v) {
 	exit(0);
       if(strcmp(*argv, "cd") == 0) 
 	chdir(argv[1]);
-      /*
 //----------------------------------------2/24/2016
 	//if the user inputs test, go to seperate case that doesn't use execvp
 	if(strcmp(*argv, "test") == 0){
 		//call a seperate function to complete the command
 		
-		//cout << "Test case" << endl;
-		//exit(0);	
-		
+		//for(int i = 0; i < v.size(); i++)
+		//	cout << v.at(i).first << endl;	
+	
 		//run_test(vector<pair<string,bool>> vec) is a function that will
 		//run our own implemented version of the bash test command
 		run_test(v);
+		return;
 	}
 	if(strcmp(*argv, "[") == 0){
+		/*************** if statement doesn't detect "["  ******************/
 		//call a seperate function to complete the command
 	
 		//cout << "Bracket case" << endl;
 		//exit(0);
-		
 		//run_bracketTest(vector<pair<string,bool>> vec) is a function that will 
 		//run our own implemented version of the bash test command
 		run_bracketTest(v);
 	}
 //----------------------------------------2/24/2016
-*/
       else {
 	prevCom = execute(argv);		
 	v.erase(v.begin());				
@@ -340,14 +534,4 @@ void run(vector<pair<string, bool> > v) {
     }
   }//why is git so difficult!
 }
-//----------------------------------------2/24/2016
-void run_test(vector<pair<string,bool> > vec){
-	//the user's parsed input will be passed in
-	//if it begins with "test"
-}
 
-void run_bracketTest(vector<pair<string,bool> > vec){
-	//the user's parsed input will be passed in
-	//if it begins with "["
-}
-//----------------------------------------2/24/2016
