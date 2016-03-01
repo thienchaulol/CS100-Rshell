@@ -305,7 +305,7 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
 }
 
 //----------------------------------------2/24/2016
-void run_test(vector<pair<string,bool> > vec){
+bool run_test(vector<pair<string,bool> > vec){
 	//the user's parsed input will be passed in
 	//if it begins with "test"
 	bool isADirectory = false;
@@ -391,28 +391,7 @@ void run_test(vector<pair<string,bool> > vec){
 	}
 	returnDir[Size + 1] = '\0';
 //cout << "Path to return to initial directory: " << returnDir <<endl;
-	
-/*add this snippet of code to the end of runTest to return to initial directory*/
-		/*12:24 PM 2/28*/
-			/*snippet only currently works for a single change in directory*/
-				/*if path is set to "/../.." a nasty pointer error pops up*/
-				/*the error is: munmap_chunk()..... */
-			/*--->the initial directory is restored but program crashes<---*/
-		/*1:05 PM 2/28*/
-			/*snippet works for multiple changes in directory*/
-				/*had to allocate memory for returnDir with "new char[Size]*/
-//	chdir(returnDir);
-
-//	char buff3[PATH_MAX + 1];
-//	cwd = getcwd( buff3, PATH_MAX + 1);
-//	cout << "Final directory char* array size: " << strlen(cwd) << endl;
-//cout << "char* array at [34] , [35]: " << cwd[34] << " " << cwd[35] << endl;
-//	if( cwd != NULL ) {
-//		cout  << "The final working directory is : " << cwd << endl;
-//	}
-/*add this snippet of code to the end of runTest to return to initial directory*/
-
-			//*******ONLY WORKS FOR NON-DEFAULT CASE: MUST BE IN FORMAT: "test -e /test/main/path/path1/path2/...."
+				//*******ONLY WORKS FOR NON-DEFAULT CASE: MUST BE IN FORMAT: "test -e /test/main/path/path1/path2/...."
 	
 //*****************-----------------------------11:23PM 2/27----------------*********************
 //	return;
@@ -439,7 +418,7 @@ void run_test(vector<pair<string,bool> > vec){
 		else{
 			cout << "(False)" << endl;
 		}
-		return;
+		return true;
 	}
 	
 //3:25 PM "-f"
@@ -546,18 +525,21 @@ void run_test(vector<pair<string,bool> > vec){
 //		cout  << "The final working directory is : " << cwd << endl;
 ///	}
 /*add this snippet of code to the end of runTest to return to initial directory*/
-	return;
+	return true;
 }
 
-void run_bracketTest(vector<pair<string,bool> > vec){
-	//the user's parsed input will be passed in
-	//if it begins with "["
-	
+bool run_bracketTest(vector<pair<string,bool> > vec){
 	int j = vec.size();
-	string x = vec.at(j).first;
-	if(x != "]"){
-		cout << "Incomplete brackets" << endl;
-		return;
+	if(vec.at(j - 1).first != "]"){
+		return false;
+	}
+	else{
+		vec.pop_back();	
+		vec.at(0).first = "test";
+		bool success = run_test(vec);
+		if(success){
+			return true;
+		}
 	}
 }
 //----------------------------------------2/24/2016
@@ -573,7 +555,7 @@ void run(vector<pair<string, bool> > v) {
     return;
   }
   while(!v.empty()) {
-    if(!v.at(0).second && doIRun) {	
+   if(!v.at(0).second && doIRun) {	
       unsigned lineSize = v.at(0).first.size() + 1;
       char **argv = new char*[lineSize];
       
@@ -592,21 +574,14 @@ void run(vector<pair<string, bool> > v) {
 	//if the user inputs test, go to seperate case that doesn't use execvp
 	if(strcmp(*argv, "test") == 0){
 		//call a seperate function to complete the command
-		
-		//for(int i = 0; i < v.size(); i++)
-		//	cout << v.at(i).first << endl;	
-	
 		//run_test(vector<pair<string,bool>> vec) is a function that will
 		//run our own implemented version of the bash test command
 		run_test(v);
 		return;
 	}
+			/*bracket case isn't detected because "[" is treated as a connector */
+			/* and this entire if statement is entered only if: (!v.at(0).second && doIRun) */
 	if(strcmp(*argv, "[") == 0){
-		/*************** if statement doesn't detect "["  ******************/
-		//call a seperate function to complete the command
-	
-		//cout << "Bracket case" << endl;
-		//exit(0);
 		//run_bracketTest(vector<pair<string,bool>> vec) is a function that will 
 		//run our own implemented version of the bash test command
 		run_bracketTest(v);
