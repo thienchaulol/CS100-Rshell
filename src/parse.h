@@ -201,7 +201,6 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
 
       for(unsigned j = 0; j < i; j++) {
 		
-
 	if(v.at(0).first == '\\' && !v.at(0).second)
 	  v.erase(v.begin());
 	else if(v.at(0).first == '"' && !v.at(0).second) {
@@ -218,8 +217,6 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
 	if(!v.empty()){
 		if(v.at(0).first == '-'){
 			//add '-' to connector
-			//connector += v.at(0).first;
-			//erase '-'
 			v.erase(v.begin());
 			//add 'e', 'f', or 'd' to connector
 			connector += v.at(0).first;
@@ -285,7 +282,11 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
 	  s.push_back(pair<string, bool>(command, false));
       }
       if(!connector.empty())
-	s.push_back(pair<string, bool>(connector, true));
+		//assignment 3, treat '[' as a regular character for run()
+		if(connector.at(0) == '['){
+			s.push_back(pair<string, bool>(connector, false));
+		}
+		else{s.push_back(pair<string, bool>(connector, true));}
     }
 
     if(!((s.at(s.size() - 1).second && s.at(s.size() - 1).first == "&&")
@@ -331,11 +332,9 @@ bool run_test(vector<pair<string,bool> > vec){
 		copy(vec.at(i).first.begin(), vec.at(i).first.end(), c);
 		c[vec.at(i).first.size()] = '\0';
 
-		//cout << "Path being pushed back: " << c << endl;
 		pathVec.push_back(c);
 	}
 	
-	//output current directory	
 	char* cwd;
     char buff[PATH_MAX + 1];
 	//getcwd() returns a pointer to a string
@@ -343,12 +342,8 @@ bool run_test(vector<pair<string,bool> > vec){
     cwd = getcwd( buff, PATH_MAX + 1 );
 
 	int initWorkDirecSize = strlen(cwd);
-//	cout << "Initial directory char* array size: " << initWorkDirecSize << endl;
 
 	char* initWorkDirec = cwd;
-//	if( cwd != NULL ) {
-//		cout  << "The initial working directory is : " << initWorkDirec << endl;
-//	}
 	
 	//change to desired directory via a for loop
 	//once done with check, change back to initial directory
@@ -359,11 +354,7 @@ bool run_test(vector<pair<string,bool> > vec){
 	}
 	char buff2[PATH_MAX + 1];
 	cwd = getcwd( buff2, PATH_MAX + 1 );
-//	if( cwd != NULL ) {
-//		cout  << "The desired working directory is : " << cwd << endl;
-//	}
 	int finWorkDirecSize = strlen(cwd);
-//*****************-----------------------------11:23PM 2/27----------------*********************
 	//code to return to initial directory
 	//initial working directory stored in initWorkDirec
 	//and then chdir() in back to the initial working directory
@@ -372,15 +363,11 @@ bool run_test(vector<pair<string,bool> > vec){
 	//starting from offset
 	int numCharToCopy = (initWorkDirecSize - strlen(cwd)) - 1;
 	//returnDir will have (numCharToCopy) characters + 1 for null char '\0'
-//cout << "strlen(initWorkDirec): " << initWorkDirecSize << endl;
-//cout << "strlen(cwd): " << strlen(cwd) << endl;
-//cout << "numCharToCopy: " << numCharToCopy << endl;	
 
 	int currWorkDirecSize = strlen(cwd);
 	//offset is strlen(cwd) + 1 because want
 	//to copy everything after cwd/(.........)
 	int offset = strlen(cwd) + 1;
-//cout << "offset: " << offset << endl;
 
 	unsigned Size = initWorkDirecSize - (currWorkDirecSize + 2);
 	char* returnDir = new char[Size];
@@ -390,16 +377,11 @@ bool run_test(vector<pair<string,bool> > vec){
 		returnDir[i] = initWorkDirec[offset + i];
 	}
 	returnDir[Size + 1] = '\0';
-//cout << "Path to return to initial directory: " << returnDir <<endl;
 				//*******ONLY WORKS FOR NON-DEFAULT CASE: MUST BE IN FORMAT: "test -e /test/main/path/path1/path2/...."
-	
-//*****************-----------------------------11:23PM 2/27----------------*********************
-//	return;
 	
 	//***********default case*************
 	if(vec.size() == 7 && vec.at(3).first == "test"){
 		string x = vec.at(4).first;
-		//cout << "DEFAULT VALUE FIRST: " << vec.at(0).first << endl;
 		struct stat buffer;
 		//yanked from other run()
 		//need to convert string to c_str for reasons unknown
@@ -507,23 +489,9 @@ bool run_test(vector<pair<string,bool> > vec){
 		}
 	}
 /*add this snippet of code to the end of runTest to return to initial directory*/
-		/*12:24 PM 2/28*/
-			/*snippet only currently works for a single change in directory*/
-				/*if path is set to "/../.." a nasty pointer error pops up*/
-				/*the error is: munmap_chunk()..... */
-			/*--->the initial directory is restored but program crashes<---*/
-		/*1:05 PM 2/28*/
-			/*snippet works for multiple changes in directory*/
-				/*had to allocate memory for returnDir with "new char[Size]*/
 	chdir(returnDir);
-
 	char buff3[PATH_MAX + 1];
 	cwd = getcwd( buff3, PATH_MAX + 1);
-//	cout << "Final directory char* array size: " << strlen(cwd) << endl;
-//cout << "char* array at [34] , [35]: " << cwd[34] << " " << cwd[35] << endl;
-//	if( cwd != NULL ) {
-//		cout  << "The final working directory is : " << cwd << endl;
-///	}
 /*add this snippet of code to the end of runTest to return to initial directory*/
 	return true;
 }
@@ -585,6 +553,7 @@ void run(vector<pair<string, bool> > v) {
 		//run_bracketTest(vector<pair<string,bool>> vec) is a function that will 
 		//run our own implemented version of the bash test command
 		run_bracketTest(v);
+		return;
 	}
 //----------------------------------------2/24/2016
       else {
