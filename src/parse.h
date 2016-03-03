@@ -313,6 +313,9 @@ bool run_test(vector<pair<string,bool> > vec){
 	bool isARegularFile = false;
 	bool exists = false;	
 	bool nonDefaultCase = false;
+	bool isCurrentPath = false;
+	bool isForwardPath = false;
+	int counter;
 	//*******IMPORTANT:implement check to see if user entered "test" in the portion "/test/file/path"
 
 	//implement change directory code to change directories
@@ -354,29 +357,64 @@ bool run_test(vector<pair<string,bool> > vec){
 	}
 	char buff2[PATH_MAX + 1];
 	cwd = getcwd( buff2, PATH_MAX + 1 );
+	char* finWorkDirec = cwd;
 	int finWorkDirecSize = strlen(cwd);
-	//code to return to initial directory
-	//initial working directory stored in initWorkDirec
-	//and then chdir() in back to the initial working directory
-
 	//number of characters to copy from source
 	//starting from offset
 	int numCharToCopy = (initWorkDirecSize - strlen(cwd)) - 1;
-	//returnDir will have (numCharToCopy) characters + 1 for null char '\0'
-
-	int currWorkDirecSize = strlen(cwd);
-	//offset is strlen(cwd) + 1 because want
-	//to copy everything after cwd/(.........)
-	int offset = strlen(cwd) + 1;
-
-	unsigned Size = initWorkDirecSize - (currWorkDirecSize + 2);
-	char* returnDir = new char[Size];
-	/*declaring i outside of for loop and inside prevents seg fault*/
-	unsigned int i = 0;
-	for(unsigned int i = 0; i < (initWorkDirecSize - currWorkDirecSize) - 1; i++){
-		returnDir[i] = initWorkDirec[offset + i];
+			//only works backwards because if desired working directory
+			//is larger than initial working directory (forward path)
+			//numCharToCopy will be <= 0, so size of returnDir is undefined	
+	char* returnDir;
+	int currWorkDirecSize;
+	if(numCharToCopy > 0){
+		//(backward path)
+		//returnDir will have (numCharToCopy) characters + 1 for null char '\0'
+		currWorkDirecSize = strlen(cwd);
+		//offset is strlen(cwd) + 1 because want
+		//to copy everything after cwd/(.........)
+		int offset = strlen(cwd) + 1;
+	
+		unsigned Size = initWorkDirecSize - (currWorkDirecSize + 2);
+		returnDir = new char[Size];
+		/*declaring i outside of for loop and inside prevents seg fault*/
+		unsigned int i = 0;
+		for(unsigned int i = 0; i < (initWorkDirecSize - currWorkDirecSize) - 1; i++){
+			returnDir[i] = initWorkDirec[offset + i];
+		}
+		returnDir[Size + 1] = '\0';
 	}
-	returnDir[Size + 1] = '\0';
+	else{
+		//(forward path/current path)
+		if(numCharToCopy == 0){
+		//(checking current path)
+			isCurrentPath = true;
+		}
+		else{
+		//(checking forward path) (numCharToCopy < 0)
+			isForwardPath = true;
+			//returnDir will be chdir(..) the number of "/"
+			currWorkDirecSize = strlen(cwd);
+			unsigned Size = currWorkDirecSize - initWorkDirecSize;
+			returnDir = new char[Size];
+
+			
+			unsigned int i = 0;
+			for(unsigned int i = 0; i < (currWorkDirecSize) - initWorkDirecSize; i++){
+				returnDir[i] = finWorkDirec[initWorkDirecSize + i];
+			}
+			//path is stored in returnDir
+			returnDir[Size + 1] = '\0';
+			//cout << "returnDir: " << returnDir << endl;
+			counter = 0;
+			for(int i = 0; i < Size; i++){
+				if(returnDir[i] == '/'){
+					counter++;
+				}
+			}
+			//cout << "counter: " << counter << endl;
+		}
+	}
 				//*******ONLY WORKS FOR NON-DEFAULT CASE: MUST BE IN FORMAT: "test -e /test/main/path/path1/path2/...."
 	
 	//***********default case*************
@@ -466,7 +504,6 @@ bool run_test(vector<pair<string,bool> > vec){
 			cout << "(False)" << endl;
 		}
 	}
-
 	else if(vec.at(1).first == "e" && vec.at(3).first == "test"){
 		//run existential case
 		struct stat buffer;
@@ -489,9 +526,31 @@ bool run_test(vector<pair<string,bool> > vec){
 		}
 	}
 /*add this snippet of code to the end of runTest to return to initial directory*/
-	chdir(returnDir);
-	char buff3[PATH_MAX + 1];
-	cwd = getcwd( buff3, PATH_MAX + 1);
+	if(!isCurrentPath && !isForwardPath){
+		chdir(returnDir);
+		char buff3[PATH_MAX + 1];
+		cwd = getcwd( buff3, PATH_MAX + 1);
+	}
+	else if(isCurrentPath){
+		
+		//char buff3[PATH_MAX + 1];
+		//cwd = getcwd( buff3, PATH_MAX + 1);
+		//cout << "final working directory" << cwd << endl;
+		return true;
+	}
+	else if(isForwardPath){
+		//change directory to initWorkDirec;
+		const char* returning = "..";
+		while(counter > 0){
+			chdir(returning);
+			counter--; 
+		}
+		//char buff3[PATH_MAX + 1];
+		//cwd = getcwd( buff3, PATH_MAX + 1);
+		//cout << "final working directory" << cwd << endl;
+		return true;
+	}
+	//cout << "final working directory" << cwd << endl;
 /*add this snippet of code to the end of runTest to return to initial directory*/
 	return true;
 }
