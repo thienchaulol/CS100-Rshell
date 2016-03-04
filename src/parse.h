@@ -305,253 +305,151 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
   return s;
 }
 
-//----------------------------------------2/24/2016
 bool run_test(vector<pair<string,bool> > vec){
-	//the user's parsed input will be passed in
-	//if it begins with "test"
-	bool isADirectory = false;
-	bool isARegularFile = false;
-	bool exists = false;	
-	bool nonDefaultCase = false;
-	bool isCurrentPath = false;
-	bool isForwardPath = false;
-	int counter;
-	//*******IMPORTANT:implement check to see if user entered "test" in the portion "/test/file/path"
-
-	//implement change directory code to change directories
-	//if it is not the default case, directory's locatioin will be
-	//specified from vec.at(7).first to vec.end()
-	//store that in a string
-
-			//*******ONLY WORKS FOR NON-DEFAULT CASE: MUST BE IN FORMAT: "test -e /test/main/path/path1/path2/...."
-	//desired path stored in pathVec. const char* in order to use chdir later
-
-	vector<const char*> pathVec;
-	for(int i = 7; i < vec.size(); i++){
-
-		unsigned lineSize = vec.at(i).first.size() + 1;
-		char **argv = new char*[lineSize];
-		char *c = new char[lineSize];
-		copy(vec.at(i).first.begin(), vec.at(i).first.end(), c);
-		c[vec.at(i).first.size()] = '\0';
-
-		pathVec.push_back(c);
-	}
-	
+	//fileName is the file to be tested
+	string fileName = vec.at(vec.size() - 1).first;
+	//testCase is the test flag(e, f, d, default case is e)	
+	string testCase = vec.at(1).first;
+	/*cout << "testCase: " << testCase << endl;*/
 	char* cwd;
     char buff[PATH_MAX + 1];
-	//getcwd() returns a pointer to a string
-	//containing the path name of the current working directory
     cwd = getcwd( buff, PATH_MAX + 1 );
+	string currDirString = cwd;
+	/*cout << "currDir: " << currDirString << endl;*/
 
-	int initWorkDirecSize = strlen(cwd);
-
-	char* initWorkDirec = cwd;
-	
-	//change to desired directory via a for loop
-	//once done with check, change back to initial directory
-	//increment by two to avoid "/"
-	for(int i = 0; i < pathVec.size(); i = i + 2){
-		//cout << "Paths: " << pathVec.at(i) << endl;
-		chdir(pathVec.at(i));
-	}
-	char buff2[PATH_MAX + 1];
-	cwd = getcwd( buff2, PATH_MAX + 1 );
-	char* finWorkDirec = cwd;
-	int finWorkDirecSize = strlen(cwd);
-	//number of characters to copy from source
-	//starting from offset
-	int numCharToCopy = (initWorkDirecSize - strlen(cwd)) - 1;
-			//only works backwards because if desired working directory
-			//is larger than initial working directory (forward path)
-			//numCharToCopy will be <= 0, so size of returnDir is undefined	
-	char* returnDir;
-	int currWorkDirecSize;
-	if(numCharToCopy > 0){
-		//(backward path)
-		//returnDir will have (numCharToCopy) characters + 1 for null char '\0'
-		currWorkDirecSize = strlen(cwd);
-		//offset is strlen(cwd) + 1 because want
-		//to copy everything after cwd/(.........)
-		int offset = strlen(cwd) + 1;
-	
-		unsigned Size = initWorkDirecSize - (currWorkDirecSize + 2);
-		returnDir = new char[Size];
-		/*declaring i outside of for loop and inside prevents seg fault*/
-		unsigned int i = 0;
-		for(unsigned int i = 0; i < (initWorkDirecSize - currWorkDirecSize) - 1; i++){
-			returnDir[i] = initWorkDirec[offset + i];
+	//push current directory into a vector
+	vector<pair<string,bool> > currDir;
+	string x = "";
+	string backSlash = "/";
+	for(int i = 0; i < currDirString.length(); i++){
+		if(currDirString.at(i) != '/'){
+			x = x + currDirString.at(i);
+			if(i == currDirString.length() - 1){
+				pair <string,bool> y (x,0);	
+				currDir.push_back(y);
+			}
 		}
-		returnDir[Size + 1] = '\0';
+		else{
+			if(i > 0){
+				pair <string,bool> y (x,0);	
+				currDir.push_back(y);
+			}
+			pair <string,bool> j (backSlash, 0);
+			currDir.push_back(j);
+			x.clear();
+		}
+	}
+	/*cout << "currDir vector contents: " << endl;
+	for(int i = 0; i < currDir.size(); i++){
+		cout << currDir.at(i).first;
+	}
+	cout << endl;*/
+
+	//steps for run_test()
+	//	1: change to desired directory
+	//	2: check for file
+	//	3: return to original directory
+
+//----------------------------1: change to desired directory
+	vec.erase(vec.begin(), vec.begin()+2);
+	vector<pair<string,bool> > desiredDir = vec;
+	desiredDir.pop_back();
+	desiredDir.pop_back();
+	/*cout << "desiredDir: ";
+	for(int i = 0; i < desiredDir.size(); i++){
+		cout << desiredDir.at(i).first;
+	}
+	cout << endl;*/
+
+	//desired directory is given in vec
+	//find the difference in directories
+	vector<string> changeInDir;
+	if(desiredDir.size() > currDir.size()){
+		//if desired directory is x amount of directories
+		//ahead of current directory
+		
+		//store difference in directories in changeInDir
+		for(int i = currDir.size(); i < desiredDir.size(); i++){
+			changeInDir.push_back(desiredDir.at(i).first);
+		}
+		/*cout << "changeInDir: ";
+		for(int i = 0; i < changeInDir.size(); i++){
+			cout << changeInDir.at(i);
+		}
+		cout << endl;*/
+
+		//change directory to desired
+		//working directory
+		for(int i = 0; i < changeInDir.size(); i++){
+			if(changeInDir.at(i) != "/"){
+				//convert string to const char
+				unsigned lineSize = changeInDir.at(i).size() + 1;
+				char **argv = new char*[lineSize];
+				char *c = new char[lineSize];
+				copy(changeInDir.at(i).begin(), changeInDir.at(i).end(), c);
+				c[changeInDir.at(i).size()] = '\0';
+				//change directory using chdir()
+				chdir(c);
+			}
+		}
+
+		//perform test in new
+		//working directory
+		if(testCase == "e"){
+			struct stat buffer;
+			unsigned lineSize =	fileName.size() + 1;
+			char** argv = new char*[lineSize];
+			char *c = new char[lineSize];
+			copy(fileName.begin(), fileName.end(), c);
+			c[fileName.size()] = '\0';
+			if(stat(c, &buffer) == 0){
+				cout << "(True)" << endl;
+			}
+			else{
+				cout << "(False)" << endl;
+			}
+		}
+		else if(testCase == "f"){
+
+		}
+		else if(testCase == "d"){
+
+		}
+	}
+	else if(desiredDir.size() == currDir.size()){
+		//desired directory is current directory
+		//perform test in current
+		//working directory
+		if(testCase == "e"){
+			struct stat buffer;
+			unsigned lineSize =	fileName.size() + 1;
+			char** argv = new char*[lineSize];
+			char *c = new char[lineSize];
+			copy(fileName.begin(), fileName.end(), c);
+			c[fileName.size()] = '\0';
+			if(stat(c, &buffer) == 0){
+				cout << "(True)" << endl;
+			}
+			else{
+				cout << "(False)" << endl;
+			}
+		}
+		else if(testCase == "f"){
+
+		}
+		else if(testCase == "d"){
+
+		}
 	}
 	else{
-		//(forward path/current path)
-		if(numCharToCopy == 0){
-		//(checking current path)
-			isCurrentPath = true;
-		}
-		else{
-		//(checking forward path) (numCharToCopy < 0)
-			isForwardPath = true;
-			//returnDir will be chdir(..) the number of "/"
-			currWorkDirecSize = strlen(cwd);
-			unsigned Size = currWorkDirecSize - initWorkDirecSize;
-			returnDir = new char[Size];
+		//desired directory is x amount of directories
+		//behind of current directory
+	}
+	/*cout << "directory at end of run_test(): ";
+    char buff2[PATH_MAX + 1];
+    cwd = getcwd( buff2, PATH_MAX + 1 );
+	cout << cwd << endl;*/
 
-			
-			unsigned int i = 0;
-			for(unsigned int i = 0; i < (currWorkDirecSize) - initWorkDirecSize; i++){
-				returnDir[i] = finWorkDirec[initWorkDirecSize + i];
-			}
-			//path is stored in returnDir
-			returnDir[Size + 1] = '\0';
-			//cout << "returnDir: " << returnDir << endl;
-			counter = 0;
-			for(int i = 0; i < Size; i++){
-				if(returnDir[i] == '/'){
-					counter++;
-				}
-			}
-			//cout << "counter: " << counter << endl;
-		}
-	}
-				//*******ONLY WORKS FOR NON-DEFAULT CASE: MUST BE IN FORMAT: "test -e /test/main/path/path1/path2/...."
-	
-	//***********default case*************
-	if(vec.size() == 7 && vec.at(3).first == "test"){
-		string x = vec.at(4).first;
-		struct stat buffer;
-		//yanked from other run()
-		//need to convert string to c_str for reasons unknown
-		unsigned lineSize = vec.at(4).first.size() + 1;
-		char **argv = new char*[lineSize];
-
-		char *c = new char[lineSize];
-		copy(vec.at(4).first.begin(), vec.at(4).first.end(), c);
-		c[vec.at(4).first.size()] = '\0';
-		
-		//use stat() to check if file exists, adapted from sources
-		if(stat (c, &buffer) == 0){
-			cout << "(True)" << endl;
-			exists = true;
-		}
-		else{
-			cout << "(False)" << endl;
-		}
-		return true;
-	}
-	
-//3:25 PM "-f"
-	if(vec.at(1).first == "f" && vec.at(3).first == "test"){
-		//f checks if file/directory exists AND is a "regular" file
-		//REGULAR FILE MEANING : NOT A DIRECTORY OR A "PIPE". couldn't implement pipe check
-		//d checks if file/directory exists AND is a directory
-		struct stat buffer;
-		//yanked from other run()
-		//need to convert string to c_str for reasons unknown
-		unsigned lineSize = vec.at(5).first.size() + 1;
-		char **argv = new char*[lineSize];
-      
-		char *c = new char[lineSize];
-		copy(vec.at(5).first.begin(), vec.at(5).first.end(), c);
-		c[vec.at(5).first.size()] = '\0';
-
-		//checking if file is a directory, if it isn't then it's a regular file
-		//fails to check if file is a "pipe". got errors using:
-		//				S_ISREG(c.st_mode);
-		//		to check whether is a file is a regular file
-		//		S_ISREG was not declared, but I included the correct libraries..idk
-		if(stat(c, &buffer) != 0){
-			cout << "cannot access" << endl;
-		}
-		else if(buffer.st_mode & S_IFDIR){
-			isADirectory = true;
-		}
-		else if(stat (c, &buffer) == 0){
-			exists = true;
-		}
-		else{
-			isADirectory = false;
-		}
-		if(!isADirectory && exists){
-			cout << "(True)" << endl;
-		}
-		else{
-			cout << "(False)" << endl;
-		}
-
-	}
-	else if(vec.at(1).first == "d" && vec.at(3).first == "test"){
-		//d checks if file/directory exists AND is a directory
-		struct stat buffer;
-		//yanked from other run()
-		//need to convert string to c_str for reasons unknown
-		unsigned lineSize = vec.at(5).first.size() + 1;
-		char **argv = new char*[lineSize];
-      
-		char *c = new char[lineSize];
- 		copy(vec.at(5).first.begin(), vec.at(5).first.end(), c);
-		c[vec.at(5).first.size()] = '\0';
-		
-		if(stat(c, &buffer) != 0){
-			cout << "cannot access" << endl;
-		}
-		if(buffer.st_mode & S_IFDIR){
-			cout << "(True)" << endl;
-			isADirectory = true;
-		}
-		else{
-			cout << "(False)" << endl;
-		}
-	}
-	else if(vec.at(1).first == "e" && vec.at(3).first == "test"){
-		//run existential case
-		struct stat buffer;
-		//yanked from other run()
-		//need to convert string to c_str for reasons unknown
-      	unsigned lineSize = vec.at(5).first.size() + 1;
-      	char **argv = new char*[lineSize];
-      
-     	char *c = new char[lineSize];
-	    copy(vec.at(5).first.begin(), vec.at(5).first.end(), c);
-     	c[vec.at(5).first.size()] = '\0';
-		
-		//use stat() to check if file exists, adapted from sources
-		if(stat (c, &buffer) == 0){
-			cout << "(True)" << endl;
-			exists = true;
-		}
-		else{
-			cout << "(False)" << endl;
-		}
-	}
-/*add this snippet of code to the end of runTest to return to initial directory*/
-	if(!isCurrentPath && !isForwardPath){
-		chdir(returnDir);
-		char buff3[PATH_MAX + 1];
-		cwd = getcwd( buff3, PATH_MAX + 1);
-	}
-	else if(isCurrentPath){
-		
-		//char buff3[PATH_MAX + 1];
-		//cwd = getcwd( buff3, PATH_MAX + 1);
-		//cout << "final working directory" << cwd << endl;
-		return true;
-	}
-	else if(isForwardPath){
-		//change directory to initWorkDirec;
-		const char* returning = "..";
-		while(counter > 0){
-			chdir(returning);
-			counter--; 
-		}
-		//char buff3[PATH_MAX + 1];
-		//cwd = getcwd( buff3, PATH_MAX + 1);
-		//cout << "final working directory" << cwd << endl;
-		return true;
-	}
-	//cout << "final working directory" << cwd << endl;
-/*add this snippet of code to the end of runTest to return to initial directory*/
 	return true;
 }
 
@@ -569,7 +467,6 @@ bool run_bracketTest(vector<pair<string,bool> > vec){
 		}
 	}
 }
-//----------------------------------------2/24/2016
 
 void run(vector<pair<string, bool> > v) {		
   bool prevCom = true; 							
