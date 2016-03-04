@@ -359,10 +359,11 @@ bool run_test(vector<pair<string,bool> > vec){
 	//	2: check for file
 	//	3: return to original directory
 
+	//remove "test" and flag from vec
 	vec.erase(vec.begin(), vec.begin()+2);
 	vector<pair<string,bool> > desiredDir = vec;
-	desiredDir.pop_back();
-	desiredDir.pop_back();
+	desiredDir.pop_back();	//remove fileName from desiredDir
+	desiredDir.pop_back();	//remove "/" from desiredDir
 /*	cout << "desiredDir: ";
 	for(int i = 0; i < desiredDir.size(); i++){
 		cout << desiredDir.at(i).first;
@@ -636,6 +637,10 @@ bool run_bracketTest(vector<pair<string,bool> > vec){
 void run(vector<pair<string, bool> > v) {		
   bool prevCom = true; 							
   bool doIRun = true;
+
+	vector<pair<string, bool> > Test;
+	vector<pair<string, bool> > restOfCommand;
+
  
   if((v.at(0).second && v.at(0).first.at(0) == '&')
      || (v.at(0).second && v.at(0).first.at(0) == '|')
@@ -665,7 +670,46 @@ void run(vector<pair<string, bool> > v) {
 		//call a seperate function to complete the command
 		//run_test(vector<pair<string,bool>> vec) is a function that will
 		//run our own implemented version of the bash test command
-		run_test(v);
+
+		//in vector v, need to seperate test command:
+		//test -e /home/csmajs/tchau006/rshell/rshell/src/main.cpp
+		//from "&& echo A". execute test seperately from connector command
+		bool noConnectorYet = true;
+		for(int i = 0; i < v.size(); i++){
+			if((v.at(i).first == "&&") || (v.at(i).first == "||") || (v.at(i).first == ";")){
+				noConnectorYet = false;
+			}
+			if(noConnectorYet){
+				Test.push_back(v.at(i));
+			}
+			if(!noConnectorYet){
+				restOfCommand.push_back(v.at(i));	
+			}
+		}
+		cout << "Test contents: ";
+		for(int i = 0; i < Test.size(); i++){
+			cout << Test.at(i).first << " ";
+		}
+		cout << endl;
+		cout << "restOfCommand contents: ";
+		for(int i = 0; i < restOfCommand.size(); i++){
+			cout << restOfCommand.at(i).first << " ";
+		}
+		cout << endl;
+		prevCom = run_test(Test);
+			if(prevCom && !restOfCommand.empty()){
+	
+//      lineSize = restOfCommand.at(0).first.size() + 1;
+//      char **argv = new char*[lineSize];
+      
+//      char *c = new char[lineSize];
+//      copy(restOfCommand.at(0).first.begin(), restOfCommand.at(0).first.end(), c);
+//     c[restOfCommand.at(0).first.size()] = '\0';
+      
+//      finalParse(c, argv);
+//				execute(argv);
+				
+			}
 		return;
 	}
 			/*bracket case isn't detected because "[" is treated as a connector */
