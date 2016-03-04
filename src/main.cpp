@@ -26,23 +26,23 @@ int main() {
       continue;
     }
 	//why is git so difficult!
-    cout << "specVec.first and specVec.second:" << endl;
+    /*cout << "specVec.first and specVec.second:" << endl;
     for(unsigned i = 0; i < specVec.size(); i++)						
 	cout << specVec.at(i).first;
     cout << endl;
     for(unsigned i = 0; i < specVec.size(); i++)							
 	cout<< specVec.at(i).second;
     cout << endl << endl;
-    
+*/
     if(!specVec.empty()) {
       vector<pair<string, bool> > parsedVec = parse(specVec);
 
-      cout << "parsedVec.second and parsedVec.first:" << endl;
+  /*    cout << "parsedVec.second and parsedVec.first:" << endl;
       for(unsigned i = 0; i < parsedVec.size(); i++)			
-	cout << parsedVec.at(i).second << ' ' << parsedVec.at(i).first.size() << ' ' << parsedVec.at(i).first << endl;
+		cout << parsedVec.at(i).second << ' ' << parsedVec.at(i).first.size() << ' ' << parsedVec.at(i).first << endl;
       cout << endl;      
       cout << "output:" << endl;
-      
+    */  
       run(parsedVec);											
     }
     

@@ -306,8 +306,15 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
 }
 
 bool run_test(vector<pair<string,bool> > vec){
+	bool defaultCase = false;
 	bool returnBack = false;
 	bool returnForward = false;
+
+	if(vec.at(1).first == "/"){
+		defaultCase = true;	
+		pair <string,bool> m ("e", false);
+		vec.insert(vec.begin()+1 , m);
+	}
 	//fileName is the file to be tested
 	string fileName = vec.at(vec.size() - 1).first;
 	//testCase is the test flag(e, f, d, default case is e)	
@@ -398,8 +405,6 @@ bool run_test(vector<pair<string,bool> > vec){
 
 		//perform test in new
 		//working directory
-		bool isADirectory = false;
-		bool exists = false;
 		struct stat buffer;
 		unsigned lineSize =	fileName.size() + 1;
 		char** argv = new char*[lineSize];
@@ -407,7 +412,16 @@ bool run_test(vector<pair<string,bool> > vec){
 		copy(fileName.begin(), fileName.end(), c);
 		c[fileName.size()] = '\0';
 	
-		if(testCase == "e"){
+		if(defaultCase){
+			
+			if(stat(c, &buffer) == 0){
+				cout << "(True)" << endl;
+			}
+			else{
+				cout << "(False)" << endl;
+			}
+		}
+		else if(testCase == "e"){
 			if(stat(c, &buffer) == 0){
 				cout << "(True)" << endl;
 			}
@@ -426,12 +440,10 @@ bool run_test(vector<pair<string,bool> > vec){
 			}
 		}
 		else if(testCase == "d"){
-			if(stat(c, &buffer) != 0){
-				cout << "cannot access" << endl;
-			}
-			if(buffer.st_mode & S_IFDIR){
+			struct stat path_stat;
+			stat(c, &path_stat);
+			if(S_ISDIR(path_stat.st_mode)){
 				cout << "(True)" << endl;
-				isADirectory = true;
 			}
 			else{
 				cout << "(False)" << endl;
@@ -446,7 +458,15 @@ bool run_test(vector<pair<string,bool> > vec){
 		copy(fileName.begin(), fileName.end(), c);
 		c[fileName.size()] = '\0';
 
-		if(testCase == "e"){
+		if(defaultCase){
+			if(stat(c, &buffer) == 0){
+				cout << "(True)" << endl;
+			}
+			else{
+				cout << "(False)" << endl;
+			}
+		}
+		else if(testCase == "e"){
 			if(stat(c, &buffer) == 0){
 				cout << "(True)" << endl;
 			}
@@ -465,12 +485,10 @@ bool run_test(vector<pair<string,bool> > vec){
 			}
 		}
 		else if(testCase == "d"){
-			if(stat(c, &buffer) != 0){
-				cout << "cannot access" << endl;
-			}
-			if(buffer.st_mode & S_IFDIR){
+			struct stat path_stat;
+			stat(c, &path_stat);
+			if(S_ISDIR(path_stat.st_mode)){
 				cout << "(True)" << endl;
-				//isADirectory = true;
 			}
 			else{
 				cout << "(False)" << endl;
@@ -514,8 +532,6 @@ bool run_test(vector<pair<string,bool> > vec){
 		cout << cwd << endl;
 	*/
 		//run tests in new directory
-		bool isADirectory = false;
-		bool exists = false;
 		struct stat buffer;
 		unsigned lineSize =	fileName.size() + 1;
 		char** argv = new char*[lineSize];
@@ -523,7 +539,15 @@ bool run_test(vector<pair<string,bool> > vec){
 		copy(fileName.begin(), fileName.end(), c);
 		c[fileName.size()] = '\0';
 	
-		if(testCase == "e"){
+		if(defaultCase){
+			if(stat(c, &buffer) == 0){
+				cout << "(True)" << endl;
+			}
+			else{
+				cout << "(False)" << endl;
+			}
+		}
+		else if(testCase == "e"){
 			if(stat(c, &buffer) == 0){
 				cout << "(True)" << endl;
 			}
@@ -542,12 +566,10 @@ bool run_test(vector<pair<string,bool> > vec){
 			}
 		}
 		else if(testCase == "d"){
-			if(stat(c, &buffer) != 0){
-				cout << "cannot access" << endl;
-			}
-			if(buffer.st_mode & S_IFDIR){
+			struct stat path_stat;
+			stat(c, &path_stat);
+			if(S_ISDIR(path_stat.st_mode)){
 				cout << "(True)" << endl;
-				isADirectory = true;
 			}
 			else{
 				cout << "(False)" << endl;
@@ -570,8 +592,10 @@ bool run_test(vector<pair<string,bool> > vec){
 				copy(u.begin(), u.end(), c);
 				c[u.size()] = '\0';
 				//change directory using chdir()
+		//		cout << "c: " << c << " ";
 				chdir(c);
 		}
+	//	cout << endl;
 	}
 	
 	if(returnForward){
@@ -611,8 +635,8 @@ bool run_bracketTest(vector<pair<string,bool> > vec){
 
 void run(vector<pair<string, bool> > v) {		
   bool prevCom = true; 							
-  bool doIRun = true;						
-  
+  bool doIRun = true;
+ 
   if((v.at(0).second && v.at(0).first.at(0) == '&')
      || (v.at(0).second && v.at(0).first.at(0) == '|')
      || (v.at(0).second && v.at(0).first.at(0) == ';')) {
