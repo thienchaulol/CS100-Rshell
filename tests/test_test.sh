@@ -4,7 +4,6 @@
 #/home/csmajs/USERNAME/rshell/rshell/src/ to perform cases
 #correctly
 ../bin/./rshell << EOF
-test /home/csmajs/tchau006/rshell/rshell/src/main.cpp
 test /home/csmajs/tchau006/rshell/rshell/src/fake.cpp
 test /home/csmajs/tchau006/rshell/rshell/src/test/dog.cpp
 test /home/csmajs/tchau006/rshell/rshell/src/test/corn.cpp
@@ -28,8 +27,11 @@ test -e /home/csmajs/tchau006/rshell/rshell/src/test/dog.cpp
 test -e /home/csmajs/tchau006/rshell/rshell/src/test/corn.cpp
 test -e /home/csmajs/tchau006/rshell/rshell
 test -e /home/csmajs/tchau006/rshell/cat
-test /home/csmajs/tchau006/rshell/rshell/src/main.cpp && echo "path exists"
-test /home/csmajs/tchau006/rshell/rshell/src/fake.cpp && echo "path doesn't exist"
+test -e /home/csmajs/tchau006/rshell/rshell && echo "path exists"
+test -e /home/csmajs/tchau006/rshell/cat && echo "path doesn't exist"
+test -e /home/csmajs/tchau006/rshell/rshell/src/main.cpp && echo "path exists" && echo "path exists"
+test -e /home/csmajs/tchau006/rshell/rshell/src/main.cpp || echo "path exists"
+[ -e /home/csmajs/tchau006/rshell/rshell/src/main.cpp ] || echo "path exists"
 exit
 EOF
 printf "\n"

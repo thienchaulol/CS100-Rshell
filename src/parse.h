@@ -621,13 +621,29 @@ bool run_test(vector<pair<string,bool> > vec){
 }
 
 bool run_bracketTest(vector<pair<string,bool> > vec){
-	int j = vec.size();
-	if(vec.at(j - 1).first != "]"){
+	bool closingBracket = true;
+	int openingBrackets = 1;
+	for(unsigned int i = 0; i < vec.size(); i++){
+		if(vec.at(i).first == "]" && openingBrackets <= 0){
+			closingBracket = false;
+		}
+		if(vec.at(i).first == "]" && openingBrackets > 0){
+			openingBrackets--;
+			vec.erase(vec.begin()+i);
+			closingBracket = true;
+		}
+	}
+
+	if(closingBracket == false){
 		return false;
 	}
 	else{
-		vec.pop_back();	
 		vec.at(0).first = "test";
+		cout << "vec. contents: ";
+		for(unsigned int i = 0; i < vec.size(); i++){
+			cout << vec.at(i).first << " ";
+		}
+		cout << endl;
 		bool success = run_test(vec);
 		if(success){
 			return true;
@@ -665,7 +681,6 @@ void run(vector<pair<string, bool> > v) {
 	exit(0);
       if(strcmp(*argv, "cd") == 0) 
 	chdir(argv[1]);
-//----------------------------------------2/24/2016
 	//if the user inputs test, go to seperate case that doesn't use execvp
 	if(strcmp(*argv, "test") == 0){
 		//call a seperate function to complete the command
@@ -675,7 +690,9 @@ void run(vector<pair<string, bool> > v) {
 		//in vector v, need to seperate test command:
 		//test -e /home/csmajs/tchau006/rshell/rshell/src/main.cpp
 		//from "&& echo A". execute test seperately from connector command
+		bool orStatement = false;
 		bool noConnectorYet = true;
+		int connectorCounter = 0;
 		for(unsigned int i = 0; i < v.size(); i++){
 			if((v.at(i).first == "&&") || (v.at(i).first == "||") || (v.at(i).first == ";")){
 				noConnectorYet = false;
@@ -684,6 +701,12 @@ void run(vector<pair<string, bool> > v) {
 				Test.push_back(v.at(i));
 			}
 			if(!noConnectorYet){
+				if((v.at(i).first == "&&") || (v.at(i).first == "||") || (v.at(i).first == ";")){
+					if(v.at(i).first == "||"){
+						orStatement = true;
+					}
+					connectorCounter++;
+				}
 				restOfCommand.push_back(v.at(i));	
 			}
 		}
@@ -691,46 +714,115 @@ void run(vector<pair<string, bool> > v) {
 		for(unsigned int i = 0; i < Test.size(); i++){
 			cout << Test.at(i).first << " ";
 		}
-		cout << endl;
-		cout << "restOfCommand contents: ";
-*/		
-		if(!restOfCommand.empty()){
+		cout << endl;*/
+		
+		if(!restOfCommand.empty() && (connectorCounter > 0)){
+			connectorCounter--;
 			restOfCommand.erase(restOfCommand.begin());
 		}
-/*		for(unsigned int i = 0; i < restOfCommand.size(); i++){
+	/*	cout << "restOfCommand contents: ";
+		for(unsigned int i = 0; i < restOfCommand.size(); i++){
 			cout << restOfCommand.at(i).first << " ";
 		}
 		cout << endl;*/
 		prevCom = run_test(Test);
-		if(prevCom && !restOfCommand.empty()){
+		if(orStatement){
+			doIRun = false;
+			return;
+		}
+		else if(prevCom && !restOfCommand.empty()){
 			doIRun = true;
 			v = restOfCommand;
-	 		unsigned lineSize = v.at(0).first.size() + 1;
-      		char **argv = new char*[lineSize];
-      
-      		char *c = new char[lineSize];
-      		copy(v.at(0).first.begin(), v.at(0).first.end(), c);
-      		c[v.at(0).first.size()] = '\0';
-      
-      		finalParse(c, argv);
-
-			prevCom = execute(argv);	
-			//v.erase(v.begin());			
+			if((v.at(0).first == "&&") || (v.at(0).first == "||") || (v.at(0).first == ";")){
+				v.erase(v.begin());
+			}
+			run(v);
 		}
 		else{
 			doIRun = false;
 		}
-		//need return or else seg fault
-		//return;
 	}
-			/*bracket case isn't detected because "[" is treated as a connector */
-			/* and this entire if statement is entered only if: (!v.at(0).second && doIRun) */
 	if(strcmp(*argv, "[") == 0){
 		//run_bracketTest(vector<pair<string,bool>> vec) is a function that will 
 		//run our own implemented version of the bash test command
-		run_bracketTest(v);
-		//need return or else seg fault
-		return;
+		bool closingBracket = true;
+		bool orStatement = false;
+
+		int openingBrackets = 1;
+		for(unsigned int i = 0; i < v.size(); i++){
+			if(v.at(i).first == "]" && openingBrackets <= 0){
+				closingBracket = false;
+			}
+			if(v.at(i).first == "]" && openingBrackets > 0){
+				openingBrackets--;
+				v.erase(v.begin()+i);
+				closingBracket = true;
+			}
+		}
+		if(closingBracket == false){
+			prevCom = false;
+			cout << "error: missing closing bracket" << endl;
+			return;
+		}
+		else{
+			v.at(0).first = "test";
+	/*		cout << "v. contents: ";
+			for(int i = 0; i < v.size(); i++){
+				cout << v.at(i).first << " ";
+			}
+			cout << endl;*/
+			bool noConnectorYet = true;
+			int connectorCounter = 0;
+			for(unsigned int i = 0; i < v.size(); i++){
+				if((v.at(i).first == "&&") || (v.at(i).first == "||") || (v.at(i).first == ";")){
+					noConnectorYet = false;
+				}
+				if(noConnectorYet){
+					Test.push_back(v.at(i));
+				}
+				if(!noConnectorYet){
+					if((v.at(i).first == "&&") || (v.at(i).first == "||") || (v.at(i).first == ";")){
+						if(v.at(i).first == "||"){
+							orStatement = true;
+						}
+						connectorCounter++;
+					}
+					restOfCommand.push_back(v.at(i));	
+				}
+			}
+	/*		cout << "Test contents: ";
+			for(unsigned int i = 0; i < Test.size(); i++){
+				cout << Test.at(i).first << " ";
+			}
+			cout << endl;*/
+		
+			if(!restOfCommand.empty() && (connectorCounter > 0)){
+				connectorCounter--;
+				restOfCommand.erase(restOfCommand.begin());
+			}
+		
+	/*		cout << "restOfCommand contents: ";
+			for(unsigned int i = 0; i < restOfCommand.size(); i++){
+				cout << restOfCommand.at(i).first << " ";
+			}
+			cout << endl;*/
+			prevCom = run_test(Test);
+			if(orStatement){
+				doIRun = false;
+				return;
+			}
+			if(prevCom && !restOfCommand.empty()){
+				doIRun = true;
+				v = restOfCommand;
+				if((v.at(0).first == "&&") || (v.at(0).first == "||") || (v.at(0).first == ";")){
+					v.erase(v.begin());
+				}
+				run(v);
+			}
+			else{
+				doIRun = false;
+			}
+		}
 	}
 //----------------------------------------2/24/2016
       else {
