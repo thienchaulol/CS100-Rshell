@@ -281,12 +281,13 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
 	if(!command.empty())
 	  s.push_back(pair<string, bool>(command, false));
       }
-      if(!connector.empty())
+      if(!connector.empty()){
 		//assignment 3, treat '[' as a regular character for run()
 		if(connector.at(0) == '['){
 			s.push_back(pair<string, bool>(connector, false));
 		}
 		else{s.push_back(pair<string, bool>(connector, true));}
+		}
     }
 
     if(!((s.at(s.size() - 1).second && s.at(s.size() - 1).first == "&&")
@@ -330,7 +331,7 @@ bool run_test(vector<pair<string,bool> > vec){
 	vector<pair<string,bool> > currDir;
 	string x = "";
 	string backSlash = "/";
-	for(int i = 0; i < currDirString.length(); i++){
+	for(unsigned int i = 0; i < currDirString.length(); i++){
 		if(currDirString.at(i) != '/'){
 			x = x + currDirString.at(i);
 			if(i == currDirString.length() - 1){
@@ -379,7 +380,7 @@ bool run_test(vector<pair<string,bool> > vec){
 		//ahead of current directory
 		returnBack = true;	
 		//store difference in directories in changeInDir
-		for(int i = currDir.size(); i < desiredDir.size(); i++){
+		for(unsigned int i = currDir.size(); i < desiredDir.size(); i++){
 			changeInDir.push_back(desiredDir.at(i).first);
 		}
 	/*	cout << "changeInDir: ";
@@ -390,12 +391,12 @@ bool run_test(vector<pair<string,bool> > vec){
 */
 		//change directory to desired
 		//working directory
-		for(int i = 0; i < changeInDir.size(); i++){
+		for(unsigned int i = 0; i < changeInDir.size(); i++){
 			if(changeInDir.at(i) != "/"){
 				returnDir.push_back(changeInDir.at(i));
 				//convert string to const char
 				unsigned lineSize = changeInDir.at(i).size() + 1;
-				char **argv = new char*[lineSize];
+				//char **argv = new char*[lineSize];
 				char *c = new char[lineSize];
 				copy(changeInDir.at(i).begin(), changeInDir.at(i).end(), c);
 				c[changeInDir.at(i).size()] = '\0';
@@ -408,7 +409,7 @@ bool run_test(vector<pair<string,bool> > vec){
 		//working directory
 		struct stat buffer;
 		unsigned lineSize =	fileName.size() + 1;
-		char** argv = new char*[lineSize];
+		//char** argv = new char*[lineSize];
 		char *c = new char[lineSize];
 		copy(fileName.begin(), fileName.end(), c);
 		c[fileName.size()] = '\0';
@@ -454,7 +455,7 @@ bool run_test(vector<pair<string,bool> > vec){
 	else if(desiredDir.size() == currDir.size()){
 		struct stat buffer;
 		unsigned lineSize =	fileName.size() + 1;
-		char** argv = new char*[lineSize];
+		//char** argv = new char*[lineSize];
 		char *c = new char[lineSize];
 		copy(fileName.begin(), fileName.end(), c);
 		c[fileName.size()] = '\0';
@@ -501,7 +502,7 @@ bool run_test(vector<pair<string,bool> > vec){
 		//behind of current directory
 		returnForward = true;
 		//store difference in directories in changeInDir
-		for(int i = desiredDir.size(); i < currDir.size(); i++){
+		for(unsigned int i = desiredDir.size(); i < currDir.size(); i++){
 			changeInDir.push_back(currDir.at(i).first);
 		}
 	/*	cout << "changeInDir: ";
@@ -518,7 +519,7 @@ bool run_test(vector<pair<string,bool> > vec){
 				string u = "..";
 				//convert string to const char
 				unsigned lineSize = changeInDir.at(i).size() + 1;
-				char **argv = new char*[lineSize];
+				//char **argv = new char*[lineSize];
 				char *c = new char[lineSize];
 				copy(u.begin(), u.end(), c);
 				c[u.size()] = '\0';
@@ -535,7 +536,7 @@ bool run_test(vector<pair<string,bool> > vec){
 		//run tests in new directory
 		struct stat buffer;
 		unsigned lineSize =	fileName.size() + 1;
-		char** argv = new char*[lineSize];
+		//char** argv = new char*[lineSize];
 		char *c = new char[lineSize];
 		copy(fileName.begin(), fileName.end(), c);
 		c[fileName.size()] = '\0';
@@ -588,7 +589,7 @@ bool run_test(vector<pair<string,bool> > vec){
 				string u = "..";
 				//convert string to const char
 				unsigned lineSize = changeInDir.at(i).size() + 1;
-				char **argv = new char*[lineSize];
+				//char **argv = new char*[lineSize];
 				char *c = new char[lineSize];
 				copy(u.begin(), u.end(), c);
 				c[u.size()] = '\0';
@@ -603,7 +604,7 @@ bool run_test(vector<pair<string,bool> > vec){
 		for(int i = returnDir.size() - 1; i >= 0; i--){
 			//convert string to const char
 			unsigned lineSize = returnDir.at(i).size() + 1;
-			char** argv = new char*[lineSize];
+		//	char** argv = new char*[lineSize];
 			char* c = new char[lineSize];
 			copy(returnDir.at(i).begin(), returnDir.at(i).end(), c);
 			c[returnDir.at(i).size()] = '\0';
@@ -632,16 +633,16 @@ bool run_bracketTest(vector<pair<string,bool> > vec){
 			return true;
 		}
 	}
+	return true;
 }
 
-void run(vector<pair<string, bool> > v) {		
-  bool prevCom = true; 							
+void run(vector<pair<string, bool> > v) {
+  bool prevCom = false; 							
   bool doIRun = true;
 
 	vector<pair<string, bool> > Test;
 	vector<pair<string, bool> > restOfCommand;
 
- 
   if((v.at(0).second && v.at(0).first.at(0) == '&')
      || (v.at(0).second && v.at(0).first.at(0) == '|')
      || (v.at(0).second && v.at(0).first.at(0) == ';')) {
@@ -675,7 +676,7 @@ void run(vector<pair<string, bool> > v) {
 		//test -e /home/csmajs/tchau006/rshell/rshell/src/main.cpp
 		//from "&& echo A". execute test seperately from connector command
 		bool noConnectorYet = true;
-		for(int i = 0; i < v.size(); i++){
+		for(unsigned int i = 0; i < v.size(); i++){
 			if((v.at(i).first == "&&") || (v.at(i).first == "||") || (v.at(i).first == ";")){
 				noConnectorYet = false;
 			}
@@ -686,31 +687,41 @@ void run(vector<pair<string, bool> > v) {
 				restOfCommand.push_back(v.at(i));	
 			}
 		}
-		cout << "Test contents: ";
-		for(int i = 0; i < Test.size(); i++){
+/*		cout << "Test contents: ";
+		for(unsigned int i = 0; i < Test.size(); i++){
 			cout << Test.at(i).first << " ";
 		}
 		cout << endl;
 		cout << "restOfCommand contents: ";
-		for(int i = 0; i < restOfCommand.size(); i++){
+*/		
+		if(!restOfCommand.empty()){
+			restOfCommand.erase(restOfCommand.begin());
+		}
+/*		for(unsigned int i = 0; i < restOfCommand.size(); i++){
 			cout << restOfCommand.at(i).first << " ";
 		}
-		cout << endl;
+		cout << endl;*/
 		prevCom = run_test(Test);
-			if(prevCom && !restOfCommand.empty()){
-	
-//      lineSize = restOfCommand.at(0).first.size() + 1;
-//      char **argv = new char*[lineSize];
+		if(prevCom && !restOfCommand.empty()){
+			doIRun = true;
+			v = restOfCommand;
+	 		unsigned lineSize = v.at(0).first.size() + 1;
+      		char **argv = new char*[lineSize];
       
-//      char *c = new char[lineSize];
-//      copy(restOfCommand.at(0).first.begin(), restOfCommand.at(0).first.end(), c);
-//     c[restOfCommand.at(0).first.size()] = '\0';
+      		char *c = new char[lineSize];
+      		copy(v.at(0).first.begin(), v.at(0).first.end(), c);
+      		c[v.at(0).first.size()] = '\0';
       
-//      finalParse(c, argv);
-//				execute(argv);
-				
-			}
-		return;
+      		finalParse(c, argv);
+
+			prevCom = execute(argv);	
+			//v.erase(v.begin());			
+		}
+		else{
+			doIRun = false;
+		}
+		//need return or else seg fault
+		//return;
 	}
 			/*bracket case isn't detected because "[" is treated as a connector */
 			/* and this entire if statement is entered only if: (!v.at(0).second && doIRun) */
@@ -718,6 +729,7 @@ void run(vector<pair<string, bool> > v) {
 		//run_bracketTest(vector<pair<string,bool>> vec) is a function that will 
 		//run our own implemented version of the bash test command
 		run_bracketTest(v);
+		//need return or else seg fault
 		return;
 	}
 //----------------------------------------2/24/2016

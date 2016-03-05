@@ -1,4 +1,5 @@
 #!/bin/bash
+../bin/./rshell << EOF
 echo A && echo dog
 echo A && ls
 echo A || echo dog
