@@ -6,6 +6,9 @@ Our program utilizes boolean values and vectors to store characters from the use
 Here's a breakdown of the program's functions and a list of known bugs.
 
 **Functionality:**
+
+**Assignment 2 Functionality**
+
 Rshell will run in a while loop. The while loop will continue to run while true.
 The program will replicate the command line of a terminal, simulating the user's username via a `char buf`, and the host via the function `gethostname()`. 
 The user's input is stored using the function `getline()` and stored as a string. 
@@ -26,10 +29,39 @@ All commands are put into the function *execute()*.
 *execute()* makes use of child and parent processes and returns a boolean value *suceeded* equal to true if the process(command) was a success, else false. 
 There are multiple checks in the *run()* to deal with incorrect input such as a single ampersand.
 
+**Assignment 3 Functionality**
+To handle the "test" command, my partner and I put a check our *run()* function to check for the keyword "test" in a
+ similar fashion to how we check for the keyword "exit" and "cd" for assignment 2. 
+If the keyword "test" is found, the user's input is split up into two vectors of pairs of strings and booleans. 
+The two vectors being: *Test* and *restOfCommand*. 
+The Test vector will hold the portion of the user's input which contains the test command and 
+the restOfCommand vector will hold the portion of the user's input which contains the other commands to be executed. 
+Once we have these two vectors, we execute the Test portion via our function *runTest()* and the restOfCommand portion via *execvp()*.
+Connector functionality was implemented through a series of checks to see if a connector exists, what type of connector it is and whether
+or not to execute restOfCommand based on that information.
+There are multiple possible bugs that can throw our implementation of *runTest()* off.
 
 **Known Bugs:**
 
 **-------More bugs commented in test cases**
+
+Input: *test -f /home/csmajs/tchau006/rshell/rshell/src/test/corn.cpp*
+Experimental Rshell Output:
+**(True)**
+Desired output:
+(False)
+
+Input: *[ -e /home/csmajs/tchau006/rshell/rshell/src/main.cpp ] && echo "path exists" && echo "path exists"*
+Experimental Rshell Output:
+**(True)
+path exists
+path exists
+path exists**
+Desired output:
+(True)
+path exists
+path exists
+
 
 Input: *echo A && <ENTER> "A"*
 Experimental Rshell Output: **No such file or directory**
@@ -37,8 +69,8 @@ Actual output: -bash: A: command not found
 
 
 Input: *ls && echo A*
-Experimental Rshell Output: **ls: cannot access : No such file or directory
-Actual output: [files]**
+Experimental Rshell Output: **ls: cannot access : No such file or directory**
+Actual output: [files]
 				A
 			"ls " a call to ls with any whitespace afterwards will lead to unexpected output
 
