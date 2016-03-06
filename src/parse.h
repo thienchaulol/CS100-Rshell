@@ -69,6 +69,8 @@ bool paranChecker(vector<pair<char, bool> > v) {
   vector<pair<char, bool> >::iterator open = v.begin();
   vector<pair<char, bool> >::iterator closed = v.end();
 
+  //iterates through input vector v
+  //to check if there are pairs of parentheses
   for(closed = v.begin(); closed != v.end(); closed++) {
     if(!closed->second && closed->first == ')') {
       isClosed = false;
