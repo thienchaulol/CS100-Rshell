@@ -66,11 +66,6 @@ Input: *echo (A) && echo C*
 Experimental Rshell Output: A: No such file or directory
 Desired Output: -bash: syntax error near unexpected token `A'
 
-Input: *(echo A) && || echo (B)*
-Experimental Rshell Output:
-A
-Desired Output: -bash: syntax error near unexpected token `||'
-
 Input: *(echo A) || echo (B)*
 Experimental Rshell Output: A
 Desired Output: -bash syntax error near unexpected token `B'
