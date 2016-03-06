@@ -126,6 +126,24 @@ vector<pair<char, bool> > hashAndSlash(string str) {
 	    }
 	  }
 	}
+	else if(line.at(i) == '\'') {
+	  if(allQuotesFound) {
+	    allQuotesFound = false;
+	    isNormalChar = true;
+	    if(i + 1 <= line.size() - 1) {
+	      i++;
+	      v.push_back(pair<char, bool>(line.at(i), true));
+	    }
+	  }
+	  else if(!allQuotesFound) {
+	    allQuotesFound = true;
+	    isNormalChar = false;
+	    if(i + 1 <= line.size() - 1) {
+	      i++;
+	      v.push_back(pair<char, bool>(line.at(i), false));
+	    }
+	  }
+	}
 	else if(line.at(i) == '(' && !isNormalChar) {
 	  paranCount++;
 	  v.push_back(pair<char, bool>(line.at(i), false));
@@ -204,6 +222,10 @@ vector<pair<string, bool> > parse(vector<pair<char, bool> > specVec) {
 	if(v.at(0).first == '\\' && !v.at(0).second)
 	  v.erase(v.begin());
 	else if(v.at(0).first == '"' && !v.at(0).second) {
+	  command += v.at(0).first;
+	  v.erase(v.begin());
+	}
+	else if(v.at(0).first == '\'' && !v.at(0).second) {
 	  command += v.at(0).first;
 	  v.erase(v.begin());
 	}
@@ -652,6 +674,21 @@ bool run_bracketTest(vector<pair<string,bool> > vec){
 	return true;
 }
 
+bool doubleConCheck(vector<pair<string, bool> > v) {
+  for(unsigned i = 0; i < v.size(); i++) 
+    if(i + 1 < v.size()) 
+      if((v.at(i).second && v.at(i).first.at(0) == '&')
+	 || (v.at(i).second && v.at(i).first.at(0) == '|')
+	 || (v.at(i).second && v.at(i).first.at(0) == ';')) 
+	if((v.at(i + 1).second && v.at(i + 1).first.at(0) == '&')
+	   || (v.at(i + 1).second && v.at(i + 1).first.at(0) == '|')
+	   || (v.at(i + 1).second && v.at(i + 1).first.at(0) == ';')) {
+	  cout << "syntax error near unexpected token `" << v.at(i + 1).first << "'" << endl;
+	  return true;
+	}
+  return false;
+}
+
 void run(vector<pair<string, bool> > v) {
   bool prevCom = false; 							
   bool doIRun = true;
@@ -665,6 +702,10 @@ void run(vector<pair<string, bool> > v) {
     cout << "syntax error near unexpected token `" << v.at(0).first << "'" << endl;
     return;
   }
+
+  if(doubleConCheck(v)) 
+    return;
+
   while(!v.empty()) {
    if(!v.at(0).second && doIRun) {	
       unsigned lineSize = v.at(0).first.size() + 1;
