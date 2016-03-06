@@ -69,7 +69,7 @@ bool paranChecker(vector<pair<char, bool> > v) {
       isClosed = false;
       for(open = closed; open != v.begin(); open--) {
 	if(!open->second && open->first == '(') {
-	  cout << "test" << endl;
+	  //cout << "test" << endl;
 	  open->second = true;
 	  isClosed = true;
 	  break;

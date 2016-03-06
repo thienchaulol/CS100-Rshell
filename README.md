@@ -62,6 +62,18 @@ Desired output:
 path exists
 path exists
 
+Input: *echo (A) && echo C*
+Experimental Rshell Output: A: No such file or directory
+Desired Output: -bash: syntax error near unexpected token `A'
+
+Input: *(echo A) && || echo (B)*
+Experimental Rshell Output:
+A
+Desired Output: -bash: syntax error near unexpected token `||'
+
+Input: *(echo A) || echo (B)*
+Experimental Rshell Output: A
+Desired Output: -bash syntax error near unexpected token `B'
 
 Input: *echo A && <ENTER> "A"*
 Experimental Rshell Output: **No such file or directory**
